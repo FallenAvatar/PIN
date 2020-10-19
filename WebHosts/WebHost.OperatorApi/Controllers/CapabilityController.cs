@@ -14,10 +14,10 @@ namespace WebHost.OperatorApi.Controllers {
 		private readonly Shared.Web.Config.Firefall _config;
 
 		public CapabilityController( ILogger<CapabilityController> logger,
-									ICapabilityRepository capabilityRepository, IConfiguration configuration ) {
+									ICapabilityRepository capabilityRepository, Shared.Web.Config.Firefall configuration ) {
 			_logger = logger;
 			_capabilityRepository = capabilityRepository;
-			_config = configuration.GetSection( "Firefall" ).Get<Shared.Web.Config.Firefall>();
+			_config = configuration;
 		}
 
 		[HttpGet]

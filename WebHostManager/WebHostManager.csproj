@@ -8,6 +8,7 @@
 	<ItemGroup>
 	  <None Remove="cert.pfx" />
 	  <None Remove="config\appsettings.Development.json" />
+	  <None Remove="tmw.local.pfx" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -16,6 +17,9 @@
 		</Content>
 		<Content Include="config\appsettings.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="tmw.local.pfx">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
 

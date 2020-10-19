@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using WebHost.ClientApi.Models;
+using Shared.Common;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +15,12 @@ namespace WebHost.ClientApi.Controllers {
 		[Route("api/v2/characters/list")]
 		[HttpGet]
 		public CharatersList GetCharactersList() {
+			var r = new Random();
+
 			return new CharatersList {
 				Characters = new List<Character> {
 					new Character {
-						CharacterGuid = 0x99aabbccddeeff00,
+						CharacterGuid = r.NextUInt64(),
 						Name = "Ascendant",
 						UniqueName = "Ascendant",
 						IsDev = false,
@@ -32,7 +35,7 @@ namespace WebHost.ClientApi.Controllers {
 						Gender = 1,
 						CurrentGender = "female",
 						EliteRank = 95487,
-						LastSeenAt = DateTime.Now - TimeSpan.FromDays(365),
+						LastSeenAt = DateTime.Now - TimeSpan.FromDays(1),
 						Visuals = new Visuals {
 							Id = 0,
 							Race = 0,
@@ -51,25 +54,13 @@ namespace WebHost.ClientApi.Controllers {
 							HairColor = new ColoredItem {
 								Id = 77193,
 								Value = new ColorValue { Color = 1917780001 } },
-							FacialHairColor = new ColoredItem
-											{
-												Id = 77193,
-												Value = new ColorValue
-														{
-															Color = 1917780001
-														}
-											},
-							HeadAccessories = new List<ColoredItem>
-											{
-												new ColoredItem
-												{
-													Id = 10117,
-													Value = new ColorValue
-															{
-																Color = 1211031763
-															}
-												}
-											},
+							FacialHairColor = new ColoredItem {
+								Id = 77193,
+								Value = new ColorValue { Color = 1917780001 } },
+							HeadAccessories = new List<ColoredItem> {
+								new ColoredItem {
+									Id = 10117,
+									Value = new ColorValue { Color = 1211031763 } } },
 							Ornaments = new List<ColoredItem>(),
 							Eyes = new Item
 									{
