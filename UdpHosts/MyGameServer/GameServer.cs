@@ -12,6 +12,8 @@ using System.Net.Sockets;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
+using System.Threading.Tasks.Dataflow;
 
 namespace MyGameServer {
 	class GameServer : PacketServer {
@@ -34,44 +36,47 @@ namespace MyGameServer {
 			ServerID = serverID;
 		}
 
-		protected override void Startup() {
+		protected override void Startup( CancellationToken ct ) {
 			Test.DataUtils.Init();
 			Controllers.Factory.Init();
 		}
 
-		protected IShard GetNextShard() {
-			foreach( var s in Shards.Values ) {
+		protected override async void ServerRunThread( CancellationToken ct ) {
+			Packet? p;
+			while( (p = await incomingPackets.ReceiveAsync( ct )) != null ) {
+				HandlePacket( p.Value, ct );
+			}
+		}
+
+		protected IShard GetNextShard(CancellationToken ct ) {
+			foreach( var s in Shards.Values.OrderBy((s) => s.CurrentPlayers) ) {
 				if( s.CurrentPlayers < MaxPlayersPerShard )
 					return s;
 			}
 
-			return NewShard();
+			return NewShard(ct);
 		}
 
-		protected IShard NewShard() {
+		protected IShard NewShard(CancellationToken ct ) {
 			var id = ServerID | (ulong)((nextShardID++) << 8);
-			return Shards.AddOrUpdate( id, new Shard( GameTickRate, id, this ), ( id, old ) => old );
+			var s = Shards.AddOrUpdate( id, new Shard( GameTickRate, id, this ), ( id, old ) => old );
+
+			s.Run(ct);
+
+			return s;
 		}
 
-		protected override bool Tick( double deltaTime, ulong currTime ) {
-			foreach( var s in Shards.Values ) {
-				if( !s.Tick( deltaTime, currTime ) || s.CurrentPlayers < MinPlayersPerShard ) {
-					// TODO: Shutdown Shard
-				}
-			}
+		//protected bool Tick( double deltaTime, ulong currTime, CancellationToken ct ) {
+		//	foreach( var s in Shards.Values ) {
+		//		if( !s.Tick( deltaTime, currTime ) || s.CurrentPlayers < MinPlayersPerShard ) {
+		//			// TODO: Shutdown Shard
+		//		}
+		//	}
 
-			return true;
-		}
+		//	return true;
+		//}
 
-		protected override void NetworkTick( double deltaTime, ulong currTime ) {
-			foreach( var s in Shards.Values ) {
-				s.NetworkTick( deltaTime, currTime );
-			}
-		}
-		protected override void Shutdown() {
-		}
-
-		protected override void HandlePacket( Packet packet ) {
+		protected override void HandlePacket( Packet packet, CancellationToken ct ) {
 			//Program.Logger.Information("[GAME] {0} sent {1} bytes.", packet.RemoteEndpoint, packet.PacketData.Length);
 			//Program.Logger.Verbose(">  {0}", BitConverter.ToString(packet.PacketData.ToArray()).Replace("-", " "));
 
@@ -82,11 +87,11 @@ namespace MyGameServer {
 				var c = new NetworkPlayer(packet.RemoteEndpoint, socketID);
 
 				client = ClientMap.AddOrUpdate( socketID, c, ( id, nc ) => { return nc; } );
-				_ = GetNextShard().MigrateIn( (INetworkPlayer)client );
+				_ = GetNextShard(ct).MigrateIn( (INetworkPlayer)client );
 			} else
 				client = ClientMap[socketID];
 
-			client.HandlePacket( packet.PacketData.Slice( 4 ) );
+			client.HandlePacket( packet.PacketData.Slice( 4 ), packet );
 		}
 	}
 }
