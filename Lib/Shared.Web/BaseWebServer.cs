@@ -36,14 +36,6 @@ namespace Shared.Web {
 							var configuration = serverOpts.ApplicationServices.GetRequiredService<IConfiguration>();
 							var environment = serverOpts.ApplicationServices.GetRequiredService<IWebHostEnvironment>();
 
-							/*var endpoints = configuration.GetSection("HttpServer:Endpoints")
-											.GetChildren()
-											.ToDictionary(section => section.Key, section => {
-												var endpoint = new Config.EndpointConfiguration();
-												section.Bind(endpoint);
-												return endpoint;
-											});*/
-
 							foreach( var config in ffConfig.WebHosts.Single(kvp => kvp.Key == serverType.FullName.Replace( ".WebServer", "" )).Value.Endpoints ) {
 								var port = config.Port ?? (config.Scheme == "https" ? 443 : 80);
 								var h = ffConfig.MainHost;

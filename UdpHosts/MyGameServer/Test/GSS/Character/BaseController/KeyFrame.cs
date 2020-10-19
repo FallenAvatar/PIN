@@ -116,11 +116,11 @@ namespace MyGameServer.Test.GSS.Character.BaseController {
 			ret.JumpJetRecharge = cd.JumpJetRecharge;
 
 			ret.ItemStatValues.AddAll( new[] {
-				new Packet.KeyFrame.StatValue{ StatID = 5, Value = 156.414169f },
+				new Packet.KeyFrame.StatValue{ StatID = 5, Value = 10000f },		// JumpJet recharge rate
 				new Packet.KeyFrame.StatValue{ StatID = 6, Value = 1037.8347f },
 				new Packet.KeyFrame.StatValue{ StatID = 7, Value = 177.44128f },
-				new Packet.KeyFrame.StatValue{ StatID = 12, Value = 16.250000f },
-				new Packet.KeyFrame.StatValue{ StatID = 35, Value = 300 },
+				new Packet.KeyFrame.StatValue{ StatID = 12, Value = 32f },	// Run Speed
+				new Packet.KeyFrame.StatValue{ StatID = 35, Value = 30000f },		// JumpJet Max
 				new Packet.KeyFrame.StatValue{ StatID = 36, Value = 250 },
 				new Packet.KeyFrame.StatValue{ StatID = 37, Value = 2.092090f },
 				new Packet.KeyFrame.StatValue{ StatID = 142, Value = 12.55f },
