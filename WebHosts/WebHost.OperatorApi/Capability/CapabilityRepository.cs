@@ -4,19 +4,19 @@ using WebHost.OperatorApi.Exceptions;
 
 namespace WebHost.OperatorApi.Capability {
 	public class CapabilityRepository : ICapabilityRepository {
-		public async Task<HostInformation> GetHostInformationAsync( string environment, int build ) {
+		public async Task<HostInformation> GetHostInformationAsync( string environment, int build, string host ) {
 			return await Task.FromResult(new HostInformation {
-				FrontendHost = "https://localhost:44399",
-				StoreHost = "https://localhost:44399",
-				ChatServer = "https://localhost:44307",
-				ReplayHost = $"https://localhost:44399/{environment}-{build}",
-				WebHost = "https://localhost:44399",
-				MarketHost = "https://localhost:44399",
-				IngameHost = "https://localhost:44303",
-				ClientapiHost = "https://localhost:44302",
-				WebAssetHost = "https://localhost:44399",
-				WebAccountsHost = "https://localhost:44399",
-				RhsigscanHost = "https://localhost:44399"
+				FrontendHost = $"https://{host}:44399",
+				StoreHost = $"https://{host}:44399",
+				ChatServer = $"https://{host}:44307",
+				ReplayHost = $"https://{host}:44399/{environment}-{build}",
+				WebHost = $"https://{host}:44399",
+				MarketHost = $"https://{host}:44399",
+				IngameHost = $"https://{host}:44303",
+				ClientapiHost = $"https://{host}:44302",
+				WebAssetHost = $"https://{host}:44399",
+				WebAccountsHost = $"https://{host}:44399",
+				RhsigscanHost = $"https://{host}:44399"
 			});
 		}
 

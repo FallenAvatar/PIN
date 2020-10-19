@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 using WebHost.OperatorApi.Capability;
@@ -10,17 +11,19 @@ namespace WebHost.OperatorApi.Controllers {
 	public class CapabilityController : ControllerBase {
 		private readonly ICapabilityRepository _capabilityRepository;
 		private readonly ILogger<CapabilityController> _logger;
+		private readonly Shared.Web.Config.Firefall _config;
 
 		public CapabilityController( ILogger<CapabilityController> logger,
-									ICapabilityRepository capabilityRepository ) {
+									ICapabilityRepository capabilityRepository, IConfiguration configuration ) {
 			_logger = logger;
 			_capabilityRepository = capabilityRepository;
+			_config = configuration.GetSection( "Firefall" ).Get<Shared.Web.Config.Firefall>();
 		}
 
 		[HttpGet]
 		[Route("check")]
 		public async Task<HostInformation> CheckAsync( string environment, int build ) {
-			return await _capabilityRepository.GetHostInformationAsync(environment, build);
+			return await _capabilityRepository.GetHostInformationAsync(environment, build, _config.MainHost);
 		}
 
 		[HttpGet]
