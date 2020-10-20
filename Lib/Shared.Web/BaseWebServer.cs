@@ -98,7 +98,7 @@ namespace Shared.Web {
 			if( env.IsDevelopment() )
 				_ = app.UseDeveloperExceptionPage();
 
-			_ = app//.UseHttpsRedirection()
+			_ = app.UseHttpsRedirection()
 				.UseSerilogRequestLogging()
 				.UseRouting()
 				.UseEndpoints( endpoints => { _ = endpoints.MapControllers(); } );

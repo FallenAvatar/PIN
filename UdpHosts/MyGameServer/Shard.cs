@@ -17,7 +17,6 @@ namespace MyGameServer {
 	public class Shard : IShard, IPacketSender {
 		public const double NetworkTickRate = 1.0 / 20.0;
 		protected long startTime;
-		protected double lastNetTick;
 		public DateTime StartTime { get { return DateTimeExtensions.Epoch.AddSeconds( startTime ); } }
 
 		public IDictionary<uint, INetworkPlayer> Clients { get; protected set; }
@@ -52,7 +51,7 @@ namespace MyGameServer {
 
 		public void RunThread( CancellationToken ct ) {
 			startTime = (long)DateTime.Now.UnixTimestamp();
-            lastNetTick = 0;
+            var lastNetTick = 0.0;
 
             var sw = new Stopwatch();
             var lastTime = 0.0;
@@ -95,7 +94,7 @@ namespace MyGameServer {
 
 		protected virtual bool ShouldNetworkTick( double deltaTime, ulong currTime ) => deltaTime >= NetworkTickRate;
 		public void NetworkTick( double deltaTime, ulong currTime, CancellationToken ct ) {
-			// Handle timeoutd, reliable retransmission, normal rx/tx
+			// Handle timeout, reliable retransmission, normal rx/tx
 			foreach( var c in Clients.Values ) {
 				c.NetworkTick( deltaTime, currTime, ct );
 			}
