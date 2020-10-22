@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using MyGameServer.Packets.Control;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Reflection;
 
 namespace MyGameServer {
 	public enum ChannelType : byte {
@@ -62,21 +63,21 @@ namespace MyGameServer {
 		}
 
 		public void HandlePacket( GamePacket packet ) {
-			incomingPackets.Enqueue(packet);
+			incomingPackets.Enqueue( packet );
 		}
 
-		public void Process(CancellationToken ct ) {
-			while( outgoingPackets.TryDequeue(out Memory<byte> qi) ) {
-				client.Send(qi);
+		public void Process( CancellationToken ct ) {
+			while( outgoingPackets.TryDequeue( out Memory<byte> qi ) ) {
+				client.Send( qi );
 				LastActivity = DateTime.Now;
 			}
 
-			while( incomingPackets.TryDequeue(out GamePacket packet) ) {
+			while( incomingPackets.TryDequeue( out GamePacket packet ) ) {
 				//Console.Write("> " + string.Concat(BitConverter.GetBytes(packet.Header.PacketHeader).ToArray().Select(b => b.ToString("X2")).ToArray()));
 				//Console.WriteLine(" "+string.Concat(packet.PacketData.ToArray().Select(b => b.ToString("X2")).ToArray()));
 				ushort seqNum = 0;
 				if( IsSequenced ) {
-					seqNum = Utils.SimpleFixEndianess(packet.Read<ushort>());
+					seqNum = Utils.SimpleFixEndianess( packet.Read<ushort>() );
 					// TODO: Implement SequencedPacketQueue
 				}
 
@@ -85,40 +86,40 @@ namespace MyGameServer {
 					int x = packet.PacketData.Length >> 3;
 					var data = packet.PacketData.ToArray();
 
-                    if( x > 0 ) {
-                        Span<ulong> uSpan = System.Runtime.InteropServices.MemoryMarshal.Cast<byte, ulong>(data);
+					if( x > 0 ) {
+						Span<ulong> uSpan = System.Runtime.InteropServices.MemoryMarshal.Cast<byte, ulong>(data);
 
-                        for( int i = 0; i < x; i++ )
-                            uSpan[i] ^= xorULong[packet.Header.ResendCount];
+						for( int i = 0; i < x; i++ )
+							uSpan[i] ^= xorULong[packet.Header.ResendCount];
 
-                        data = System.Runtime.InteropServices.MemoryMarshal.Cast<ulong, byte>( uSpan ).ToArray();
-                    }
+						data = System.Runtime.InteropServices.MemoryMarshal.Cast<ulong, byte>( uSpan ).ToArray();
+					}
 
-                    for( int i = x * 8; i < packet.PacketData.Length; i++ )
-                        data[i] ^= xorByte[packet.Header.ResendCount];
+					for( int i = x * 8; i < packet.PacketData.Length; i++ )
+						data[i] ^= xorByte[packet.Header.ResendCount];
 
-                    //for( int i = 0; i < data.Length; i++ )
-                    //	data[i] ^= xorByte[packet.Header.ResendCount];
+					//for( int i = 0; i < data.Length; i++ )
+					//	data[i] ^= xorByte[packet.Header.ResendCount];
 
-                    packet = new GamePacket(packet.Header, new ReadOnlyMemory<byte>( data ));
+					packet = new GamePacket( packet.Header, new ReadOnlyMemory<byte>( data ) );
 					Program.Logger.Fatal( "---> Resent packet!!! C:{0}: {1} bytes", Type, packet.TotalBytes );
 				}
 
 				if( packet.Header.IsSplit )
-					Program.Logger.Fatal("---> Split packet!!! C:{0}: {1} bytes", Type, packet.TotalBytes);
+					Program.Logger.Fatal( "---> Split packet!!! C:{0}: {1} bytes", Type, packet.TotalBytes );
 
 				if( IsReliable && (seqNum > LastAck || (seqNum < 0xff && LastAck > 0xff00)) ) {
 					client.SendAck( Type, seqNum, packet.Recieved );
 					LastAck = seqNum;
 				}
 
-				PacketAvailable?.Invoke(packet);
+				PacketAvailable?.Invoke( packet );
 				LastActivity = DateTime.Now;
 			}
 
 			if( (DateTime.Now - LastActivity).TotalMilliseconds > 100 ) {
 				// Send heartbeat?
-            }
+			}
 		}
 
 		public async Task<bool> Send<T>( T pkt ) where T : struct {
@@ -126,7 +127,7 @@ namespace MyGameServer {
 			if( pkt is IWritable write ) {
 				p = write.Write();
 			} else
-				p = Utils.WriteStruct(pkt);
+				p = Utils.WriteStruct( pkt );
 
 			var conMsgAttr = (typeof(T).GetCustomAttributes(typeof(ControlMessageAttribute), false).FirstOrDefault()) as ControlMessageAttribute;
 			var matMsgAttr = (typeof(T).GetCustomAttributes(typeof(MatrixMessageAttribute), false).FirstOrDefault()) as MatrixMessageAttribute;
@@ -134,21 +135,21 @@ namespace MyGameServer {
 			if( conMsgAttr != null ) {
 				var msgID = conMsgAttr.MsgID;
 				var t = new Memory<byte>(new byte[1 + p.Length]);
-				p.CopyTo(t.Slice(1));
-				Utils.WritePrimitive( (byte)msgID).CopyTo(t);
+				p.CopyTo( t.Slice( 1 ) );
+				Utils.WritePrimitive( (byte)msgID ).CopyTo( t );
 				p = t;
-				Program.Logger.Verbose("<-- {0}: MsgID = {1} ({2})", Type, msgID, (byte)msgID);
+				Program.Logger.Verbose( "<-- {0}: MsgID = {1} ({2})", Type, msgID, (byte)msgID );
 			} else if( matMsgAttr != null ) {
 				var msgID = matMsgAttr.MsgID;
 				var t = new Memory<byte>(new byte[1 + p.Length]);
-				p.CopyTo(t.Slice(1));
-				Utils.WritePrimitive( (byte)msgID).CopyTo(t);
+				p.CopyTo( t.Slice( 1 ) );
+				Utils.WritePrimitive( (byte)msgID ).CopyTo( t );
 				p = t;
-				Program.Logger.Verbose("<-- {0}: MsgID = {1} ({2})", Type, msgID, (byte)msgID);
+				Program.Logger.Verbose( "<-- {0}: MsgID = {1} ({2})", Type, msgID, (byte)msgID );
 			} else
 				throw new Exception();
 
-			return await Send(p);
+			return await Send( p );
 		}
 
 		public async Task<bool> SendClass<T>( T pkt, Type msgEnumType = null ) where T : class {
@@ -176,10 +177,10 @@ namespace MyGameServer {
 
 			p = t;
 
-            if( msgEnumType == null )
-                Program.Logger.Verbose( "<-- {0}: MsgID = 0x{1:X2}", Type, msgID );
-            else
-                Program.Logger.Verbose( "<-- {0}: MsgID = {1} (0x{2:X2})", Type, Enum.Parse( msgEnumType, Enum.GetName( msgEnumType, msgID ) ), msgID );
+			if( msgEnumType == null )
+				Program.Logger.Verbose( "<-- {0}: MsgID = 0x{1:X2}", Type, msgID );
+			else
+				Program.Logger.Verbose( "<-- {0}: MsgID = {1} (0x{2:X2})", Type, Enum.Parse( msgEnumType, Enum.GetName( msgEnumType, msgID ) ), msgID );
 
 			return await Send( p );
 		}
@@ -189,37 +190,37 @@ namespace MyGameServer {
 			if( pkt is IWritable write ) {
 				p = write.Write();
 			} else
-				p = Utils.WriteStruct(pkt);
+				p = Utils.WriteStruct( pkt );
 
 			var gssMsgAttr = (typeof(T).GetCustomAttributes(typeof(GSSMessageAttribute), false).FirstOrDefault()) as GSSMessageAttribute;
 
 			if( gssMsgAttr != null ) {
 				var msgID = gssMsgAttr.MsgID;
 				var t = new Memory<byte>(new byte[9 + p.Length]);
-				p.CopyTo(t.Slice(9));
+				p.CopyTo( t.Slice( 9 ) );
 
-				Utils.WritePrimitive(entityID).CopyTo(t);
+				Utils.WritePrimitive( entityID ).CopyTo( t );
 
 				// Intentionally overwrite first byte of Entity ID
 				if( controllerID.HasValue )
-					Utils.WritePrimitive((byte)controllerID.Value).CopyTo(t);
+					Utils.WritePrimitive( (byte)controllerID.Value ).CopyTo( t );
 				else if( gssMsgAttr.ControllerID.HasValue )
-					Utils.WritePrimitive((byte)gssMsgAttr.ControllerID.Value).CopyTo(t);
+					Utils.WritePrimitive( (byte)gssMsgAttr.ControllerID.Value ).CopyTo( t );
 				else
 					throw new Exception();
 
-				Utils.WritePrimitive( msgID).CopyTo(t.Slice(8));
+				Utils.WritePrimitive( msgID ).CopyTo( t.Slice( 8 ) );
 
 				p = t;
 
-                if( msgEnumType == null )
-                    Program.Logger.Verbose( "<-- {0}: Controller = {1} Entity = 0x{2:X16} MsgID = 0x{3:X2}", Type, controllerID.HasValue ? controllerID.Value : gssMsgAttr.ControllerID.Value, entityID, msgID );
-                else
-                    Program.Logger.Verbose( "<-- {0}: Controller = {1} Entity = 0x{2:X16} MsgID = {3} (0x{4:X2})", Type, controllerID.HasValue ? controllerID.Value : gssMsgAttr.ControllerID.Value, entityID, Enum.Parse( msgEnumType, Enum.GetName( msgEnumType, msgID ) ), msgID );
-            } else
+				if( msgEnumType == null )
+					Program.Logger.Verbose( "<-- {0}: Controller = {1} Entity = 0x{2:X16} MsgID = 0x{3:X2}", Type, controllerID.HasValue ? controllerID.Value : gssMsgAttr.ControllerID.Value, entityID, msgID );
+				else
+					Program.Logger.Verbose( "<-- {0}: Controller = {1} Entity = 0x{2:X16} MsgID = {3} (0x{4:X2})", Type, controllerID.HasValue ? controllerID.Value : gssMsgAttr.ControllerID.Value, entityID, Enum.Parse( msgEnumType, Enum.GetName( msgEnumType, msgID ) ), msgID );
+			} else
 				throw new Exception();
 
-			return await Send( p);
+			return await Send( p );
 		}
 
 		public async Task<bool> SendGSSClass<T>( T pkt, ulong entityID, Enums.GSS.Controllers? controllerID = null, Type msgEnumType = null ) where T : class {
@@ -227,7 +228,7 @@ namespace MyGameServer {
 			if( pkt is IWritable write ) {
 				p = write.Write();
 			} else
-				p = Utils.WriteClass(pkt);
+				p = Utils.WriteClass( pkt );
 
 			//Console.WriteLine( string.Concat( p.ToArray().Select( b => b.ToString( "X2" ) ).ToArray() ) );
 			var gssMsgAttr = (typeof(T).GetCustomAttributes(typeof(GSSMessageAttribute), false).FirstOrDefault()) as GSSMessageAttribute;
@@ -235,32 +236,32 @@ namespace MyGameServer {
 			if( gssMsgAttr != null ) {
 				var msgID = gssMsgAttr.MsgID;
 				var t = new Memory<byte>(new byte[9 + p.Length]);
-				p.CopyTo(t.Slice(9));
+				p.CopyTo( t.Slice( 9 ) );
 
-				Utils.WritePrimitive( entityID).CopyTo(t);
+				Utils.WritePrimitive( entityID ).CopyTo( t );
 
 				// Intentionally overwrite first byte of Entity ID
 				if( controllerID.HasValue )
-					Utils.WritePrimitive((byte)controllerID.Value).CopyTo(t);
+					Utils.WritePrimitive( (byte)controllerID.Value ).CopyTo( t );
 				else if( gssMsgAttr.ControllerID.HasValue )
-					Utils.WritePrimitive( (byte)gssMsgAttr.ControllerID.Value).CopyTo(t);
+					Utils.WritePrimitive( (byte)gssMsgAttr.ControllerID.Value ).CopyTo( t );
 				else
 					throw new Exception();
 
-				Utils.WritePrimitive( msgID).CopyTo(t.Slice(8));
+				Utils.WritePrimitive( msgID ).CopyTo( t.Slice( 8 ) );
 
 				p = t;
 
-                if( msgEnumType == null )
-                    Program.Logger.Verbose( "<-- {0}: Controller = {1} Entity = 0x{2:X16} MsgID = 0x{3:X2}", Type, controllerID.HasValue ? controllerID.Value : gssMsgAttr.ControllerID.Value, entityID, msgID );
-                else
-                    Program.Logger.Verbose( "<-- {0}: Controller = {1} Entity = 0x{2:X16} MsgID = {3} (0x{4:X2})", Type, controllerID.HasValue ? controllerID.Value : gssMsgAttr.ControllerID.Value, entityID, Enum.Parse( msgEnumType, Enum.GetName( msgEnumType, msgID ) ), msgID );
+				if( msgEnumType == null )
+					Program.Logger.Verbose( "<-- {0}: Controller = {1} Entity = 0x{2:X16} MsgID = 0x{3:X2}", Type, controllerID.HasValue ? controllerID.Value : gssMsgAttr.ControllerID.Value, entityID, msgID );
+				else
+					Program.Logger.Verbose( "<-- {0}: Controller = {1} Entity = 0x{2:X16} MsgID = {3} (0x{4:X2})", Type, controllerID.HasValue ? controllerID.Value : gssMsgAttr.ControllerID.Value, entityID, Enum.Parse( msgEnumType, Enum.GetName( msgEnumType, msgID ) ), msgID );
 
-                //Program.Logger.Verbose( "<--- Sending {0} bytes", p.Length );
-            } else
+				//Program.Logger.Verbose( "<--- Sending {0} bytes", p.Length );
+			} else
 				throw new Exception();
 
-			return await Send( p);
+			return await Send( p );
 		}
 
 		private const int ProtocolHeaderSize = 80; // UDP + IP
@@ -272,34 +273,98 @@ namespace MyGameServer {
 			if( IsSequenced )
 				hdrLen += 2;
 
-			// TODO: Send UGSS messages that are split over RGSS
+			// Send UGSS messages that are split over RGSS
+			if( Type == ChannelType.UnreliableGss && p.Length + hdrLen >= MaxPacketSize )
+				return await client.NetChans[ChannelType.ReliableGss].Send( p );
+
 			while( p.Length > 0 ) {
 				var len = Math.Min(p.Length + hdrLen, MaxPacketSize);
 
 				var t = new Memory<byte>(new byte[len]);
-				p.Slice(0, len - hdrLen).CopyTo(t.Slice(hdrLen));
+				p.Slice( 0, len - hdrLen ).CopyTo( t.Slice( hdrLen ) );
 
 				if( IsSequenced ) {
 					if( IsReliable )
 						Program.Logger.Verbose( "<- {0} SeqNum =  {1}", Type, CurrentSequenceNumber );
 
-					Utils.WritePrimitive(Utils.SimpleFixEndianess(CurrentSequenceNumber)).CopyTo(t.Slice(2, 2));
+					Utils.WritePrimitive( Utils.SimpleFixEndianess( CurrentSequenceNumber ) ).CopyTo( t.Slice( 2, 2 ) );
 					unchecked { CurrentSequenceNumber++; }
 				}
 
 				var hdr = new GamePacketHeader(Type, 0, (p.Length + hdrLen) > MaxPacketSize, (ushort)t.Length);
 				var hdrBytes = Utils.WritePrimitive(Utils.SimpleFixEndianess(hdr.PacketHeader));
-				hdrBytes.CopyTo(t);
+				hdrBytes.CopyTo( t );
 
 				//Console.Write("< "+string.Concat(BitConverter.GetBytes(Utils.SimpleFixEndianess(hdr.PacketHeader)).ToArray().Select(b => b.ToString("X2")).ToArray()));
 				//Console.WriteLine( " "+string.Concat( t.Slice(2).ToArray().Select( b => b.ToString( "X2" ) ).ToArray() ) )
 
-				outgoingPackets.Enqueue(t);
+				outgoingPackets.Enqueue( t );
 
-				p = p.Slice(len - hdrLen);
+				p = p.Slice( len - hdrLen );
 			}
 
 			return true;
+		}
+
+		public Memory<byte> GetBytes<T>( T pkt ) where T : class {
+			Memory<byte> p;
+			if( pkt is IWritable write )
+				p = write.Write();
+			else
+				p = Utils.WriteClass( pkt );
+
+			var controlMsgAttr = typeof(T).GetCustomAttribute<ControlMessageAttribute>();
+			var matrixMsgAttr = typeof(T).GetCustomAttribute<MatrixMessageAttribute>();
+			byte msgID;
+
+			if( controlMsgAttr != null )
+				msgID = (byte)controlMsgAttr.MsgID;
+			else if( matrixMsgAttr != null )
+				msgID = (byte)matrixMsgAttr.MsgID;
+			else
+				throw new Exception();
+
+			var ret = new Memory<byte>(new byte[1 + p.Length]);
+			p.CopyTo( ret.Slice( 1 ) );
+
+			Utils.WritePrimitive( msgID ).CopyTo( ret );
+
+			p = ret;
+
+			return p;
+		}
+
+		public Memory<byte> GetGSSBytes<T>( T pkt, ulong entityID, Enums.GSS.Controllers? controllerID = null ) where T : class {
+			Memory<byte> p;
+			if( pkt is IWritable write ) {
+				p = write.Write();
+			} else
+				p = Utils.WriteClass( pkt );
+
+			var gssMsgAttr = typeof(T).GetCustomAttribute<GSSMessageAttribute>();
+
+			if( gssMsgAttr == null )
+				throw new Exception();
+
+			var msgID = gssMsgAttr.MsgID;
+			var ret = new Memory<byte>(new byte[9 + p.Length]);
+			p.CopyTo( ret.Slice( 9 ) );
+
+			Utils.WritePrimitive( entityID ).CopyTo( ret );
+
+			// Intentionally overwrite first byte of Entity ID
+			if( controllerID.HasValue )
+				Utils.WritePrimitive( (byte)controllerID.Value ).CopyTo( ret );
+			else if( gssMsgAttr.ControllerID.HasValue )
+				Utils.WritePrimitive( (byte)gssMsgAttr.ControllerID.Value ).CopyTo( ret );
+			else
+				throw new Exception();
+
+			Utils.WritePrimitive( msgID ).CopyTo( ret.Slice( 8 ) );
+
+			p = ret;
+
+			return p;
 		}
 	}
 }

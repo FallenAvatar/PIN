@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
+using System.Runtime;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,23 +23,24 @@ namespace MyGameServer {
 		public DateTime StartTime { get { return DateTimeExtensions.Epoch.AddSeconds( startTime ); } }
 
 		public IDictionary<uint, INetworkPlayer> Clients { get; protected set; }
+		public IPacketSender NetServer { get; }
 		public IDictionary<ulong, IEntity> Entities { get; protected set; }
 		public PhysicsEngine Physics { get; protected set; }
 		public AIEngine AI { get; protected set; }
 		public ulong InstanceID { get; }
-		protected IPacketSender Sender { get; }
 		public ulong CurrentTimeLong { get; protected set; }
 		public IDictionary<ushort, Tuple<IEntity, Enums.GSS.Controllers>> EntityRefMap { get; }
 		private ushort LastEntityRefId;
 		protected Thread runThread;
 
-		public Shard( double gameTickRate, ulong instID, IPacketSender sender ) {
+		public Shard( double gameTickRate, ulong instID, IPacketSender netServer ) {
 			Clients = new ConcurrentDictionary<uint, INetworkPlayer>();
 			Entities = new ConcurrentDictionary<ulong, IEntity>();
 			Physics = new PhysicsEngine( gameTickRate );
 			AI = new AIEngine();
+
+			NetServer = netServer;
 			InstanceID = instID;
-			Sender = sender;
 			EntityRefMap = new ConcurrentDictionary<ushort, Tuple<IEntity, Enums.GSS.Controllers>>();
 			LastEntityRefId = 0;
 		}
@@ -60,8 +64,13 @@ namespace MyGameServer {
 
             sw.Start();
 
-            while( !ct.IsCancellationRequested ) {
-                var currt = (ulong)(DateTime.Now.UnixTimestamp() * 1000);
+			//GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
+
+			while( !ct.IsCancellationRequested ) {
+				
+				//var noGC = GC.TryStartNoGCRegion( 256 * 1024 * 1024 );
+
+				var currt = (ulong)(DateTime.Now.UnixTimestamp() * 1000);
                 currTime = unchecked((ulong)sw.Elapsed.TotalMilliseconds);
                 delta = currTime - lastTime;
 
@@ -74,8 +83,14 @@ namespace MyGameServer {
                     break;
 
                 lastTime = currTime;
-                _ = Thread.Yield();
-            }
+
+				//if( noGC )
+				//	GC.EndNoGCRegion();
+				//GC.Collect( 1, GCCollectionMode.Forced, true, false );
+				//GC.WaitForPendingFinalizers();
+
+				_ = Thread.Yield();
+			}
 
             sw.Stop();
         }
@@ -113,7 +128,7 @@ namespace MyGameServer {
 			return true;
 		}
 
-		public async Task<bool> Send( Memory<byte> p, IPEndPoint ep ) => await Sender.Send( p, ep );
+		public async Task<bool> Send( Memory<byte> p, IPEndPoint ep ) => await NetServer.Send( p, ep );
 
 		public ushort AssignNewRefId( IEntity entity, Enums.GSS.Controllers controller ) {
 			while( EntityRefMap.ContainsKey( unchecked(++LastEntityRefId) ) || LastEntityRefId == 0 || LastEntityRefId == 0xffff )
@@ -122,6 +137,44 @@ namespace MyGameServer {
 			EntityRefMap.Add( LastEntityRefId, new Tuple<IEntity, Enums.GSS.Controllers>( entity, controller ) );
 
 			return unchecked(LastEntityRefId++);
+		}
+
+		public async Task<bool> SendAll<T>( ChannelType chan, T pkt, INetworkPlayer ignore = null ) where T : class {
+			var tasks = new List<Task<bool>>();
+
+			// TODO: Channel.GetBytes(..) once and send to all clients
+
+			foreach( var c in Clients.Values ) {
+				if( c == ignore )
+					continue;
+
+				tasks.Add( c.NetChans[chan].SendClass( pkt ) );
+            }
+
+			return (await Task.WhenAll( tasks )).All((r) => r);
+        }
+
+		public async Task<bool> SendGSSAll<T>( ChannelType chan, T pkt, ulong entityID, Enums.GSS.Controllers? controllerID = null, INetworkPlayer ignore = null ) where T : class {
+			var tasks = new List<Task<bool>>();
+
+			// TODO: Channel.GetGSSBytes(..) once and send to all clients
+
+			foreach( var c in Clients.Values ) {
+				if( c == ignore )
+					continue;
+
+				tasks.Add( c.NetChans[chan].SendGSSClass( pkt, entityID, controllerID ); );
+			}
+
+			return (await Task.WhenAll( tasks )).All( ( r ) => r );
+		}
+
+		public async Task<bool> SendTo<T>( INetworkPlayer player, ChannelType chan, T pkt ) where T : class {
+			return await player.NetChans[chan].SendClass( pkt );
+		}
+
+		public async Task<bool> SendGSSTo<T>( INetworkPlayer player, ChannelType chan, T pkt, ulong entityID, Enums.GSS.Controllers? controllerID = null ) where T : class {
+			return await player.NetChans[chan].SendGSSClass( pkt, entityID, controllerID );
 		}
 	}
 }
