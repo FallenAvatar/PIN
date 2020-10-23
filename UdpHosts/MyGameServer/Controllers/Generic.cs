@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 using MyGameServer.Packets;
 using MyGameServer.Packets.Control;
@@ -9,15 +10,15 @@ namespace MyGameServer.Controllers {
 	[ControllerID(Enums.GSS.Controllers.Generic)]
 	public class Generic : Base {
 
-		public override void Init( INetworkClient client, IPlayer player, IShard shard ) {
+		public async override Task Init( INetworkPlayer player, IShard shard ) {
 
 		}
 
 		[MessageID((byte)Enums.GSS.Generic.Commands.ScheduleUpdateRequest)]
-		public void ScheduleUpdateRequest( INetworkClient client, IPlayer player, ulong EntityID, GamePacket packet ) {
+		public void ScheduleUpdateRequest( INetworkPlayer player, IShard shard, ulong EntityID, GamePacket packet ) {
 			var req = packet.Read<Packets.GSS.Generic.ScheduleUpdateRequest>();
 
-			player.LastRequestedUpdate = client.AssignedShard.CurrentTime;
+			player.LastRequestedUpdate = shard.CurrentTime;
 			player.RequestedClientTime = Math.Max(req.requestClientTime, player.RequestedClientTime);
 
 			if( !player.FirstUpdateRequested ) {
@@ -29,11 +30,11 @@ namespace MyGameServer.Controllers {
 		}
 
 		[MessageID((byte)Enums.GSS.Generic.Commands.RequestLogout)]
-		public void RequestLogout( INetworkClient client, IPlayer player, ulong EntityID, GamePacket packet ) {
+		public async Task RequestLogout( INetworkPlayer player, IShard shard, ulong EntityID, GamePacket packet ) {
 			var resp = new CloseConnection {
 				Unk1 = 0
 			};
-			client.NetChans[ChannelType.Control].SendClass(resp, msgEnumType: typeof(Enums.ControlPacketType));
+			_ = await shard.SendTo(player, ChannelType.Control, resp);
 		}
 	}
 }

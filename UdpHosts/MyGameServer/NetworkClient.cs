@@ -19,7 +19,7 @@ namespace MyGameServer {
 		public IPEndPoint RemoteEndpoint { get; protected set; }
 		public DateTime NetLastActive { get; protected set; }
 		protected IPacketSender Sender { get; set; }
-		protected IPlayer Player { get; private set; }
+		protected INetworkPlayer Player { get; private set; }
 		public ImmutableDictionary<ChannelType, Channel> NetChans { get; protected set; }
 		public IShard AssignedShard { get; protected set; }
 
@@ -30,7 +30,7 @@ namespace MyGameServer {
 			NetLastActive = DateTime.Now;
 		}
 
-		public void Init( IPlayer player, IShard shard, IPacketSender sender ) {
+		public void Init( INetworkPlayer player, IShard shard, IPacketSender sender ) {
 			Player = player;
 			Sender = sender;
 			NetClientStatus = Status.Connecting;
@@ -58,8 +58,11 @@ namespace MyGameServer {
 				return;
 			}
 
+			if( Player.EntityID != EntityID )
+				Program.Logger.Fatal( "> GSS Player.EntityID != EntityID [{0} != {1}]", Player.EntityID, EntityID );
+
 			Program.Logger.Verbose("--> {0}: Controller = {1} Entity = 0x{2:X16} MsgID = {3}", packet.Header.Channel, ControllerID, EntityID, MsgID);
-			conn.HandlePacket( this, Player, EntityID, MsgID, packet );
+			conn.HandlePacket( Player, AssignedShard, EntityID, MsgID, packet );
 		}
 
 		private void Matrix_PacketAvailable( GamePacket packet ) {
@@ -70,11 +73,11 @@ namespace MyGameServer {
 			case Enums.MatrixPacketType.Login:
 				// Login
 				var loginpkt = packet.Read<Packets.Matrix.Login>();
-				Player.Login( loginpkt.CharacterGUID );
+				_ = Player.Login( loginpkt.CharacterGUID );
 
 				break;
 			case Enums.MatrixPacketType.EnterZoneAck:
-				Controllers.Factory.Get<Controllers.Character.BaseController>().Init( this, Player, AssignedShard );
+				_ = Controllers.Factory.Get<Controllers.Character.BaseController>().Init( Player, AssignedShard );
 
 				break;
 			case Enums.MatrixPacketType.KeyframeRequest:
@@ -85,7 +88,7 @@ namespace MyGameServer {
 
 				break;
 			case Enums.MatrixPacketType.ClientStatus:
-				NetChans[ChannelType.Matrix].SendClass(new Packets.Matrix.MatrixStatus() );
+				_ = NetChans[ChannelType.Matrix].SendClass(new Packets.Matrix.MatrixStatus() );
 				break;
 			case Enums.MatrixPacketType.LogInstrumentation:
 				// Ignore
@@ -120,7 +123,7 @@ namespace MyGameServer {
 			case Enums.ControlPacketType.TimeSyncRequest:
 				var req = packet.Read<Packets.Control.TimeSyncRequest>();
 
-				NetChans[ChannelType.Control].Send( new Packets.Control.TimeSyncResponse( req.ClientTime, unchecked(AssignedShard.CurrentTimeLong*1000) ) );
+				_ = NetChans[ChannelType.Control].Send( new Packets.Control.TimeSyncResponse( req.ClientTime, unchecked(AssignedShard.CurrentTimeLong*1000) ) );
 				break;
 			case Enums.ControlPacketType.MTUProbe:
 				var mtuPkt = packet.Read<Packets.Control.MTUProbe>();

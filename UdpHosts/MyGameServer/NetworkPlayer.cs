@@ -4,6 +4,7 @@ using System.Net;
 using System.Numerics;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 using MyGameServer.Data;
 using MyGameServer.Packets.GSS;
@@ -36,7 +37,7 @@ namespace MyGameServer {
 			Init( this, shard, shard );
 		}
 
-		public void Login( ulong charID ) {
+		public async Task Login( ulong charID ) {
 			CharacterID = charID;
 			CharacterEntity = new Entities.Character( AssignedShard, charID & 0xffffffffffffff00 );
 			CharacterEntity.Load( charID );
@@ -46,7 +47,7 @@ namespace MyGameServer {
 			var wel = new Packets.Matrix.WelcomeToTheMatrix {
 				InstanceID = AssignedShard.InstanceID
 			};
-			NetChans[ChannelType.Matrix].SendClass( wel );
+			_ = await NetChans[ChannelType.Matrix].SendClass( wel );
 
 			EnterZone( Test.DataUtils.GetZone( 448 ) );
 		}

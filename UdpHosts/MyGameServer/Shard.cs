@@ -51,18 +51,18 @@ namespace MyGameServer {
 
 		public void Stop( ) {
 			runThread.Abort();
-        }
+		}
 
 		public void RunThread( CancellationToken ct ) {
 			startTime = (long)DateTime.Now.UnixTimestamp();
-            var lastNetTick = 0.0;
+			var lastNetTick = 0.0;
 
-            var sw = new Stopwatch();
-            var lastTime = 0.0;
-            ulong currTime;
-            double delta;
+			var sw = new Stopwatch();
+			var lastTime = 0.0;
+			ulong currTime;
+			double delta;
 
-            sw.Start();
+			sw.Start();
 
 			//GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
 
@@ -71,18 +71,18 @@ namespace MyGameServer {
 				//var noGC = GC.TryStartNoGCRegion( 256 * 1024 * 1024 );
 
 				var currt = (ulong)(DateTime.Now.UnixTimestamp() * 1000);
-                currTime = unchecked((ulong)sw.Elapsed.TotalMilliseconds);
-                delta = currTime - lastTime;
+				currTime = unchecked((ulong)sw.Elapsed.TotalMilliseconds);
+				delta = currTime - lastTime;
 
-                if( ShouldNetworkTick( currTime - lastNetTick, currt ) ) {
-                    NetworkTick( currTime - lastNetTick, currt, ct );
-                    lastNetTick = currTime;
-                }
+				if( ShouldNetworkTick( currTime - lastNetTick, currt ) ) {
+					NetworkTick( currTime - lastNetTick, currt, ct );
+					lastNetTick = currTime;
+				}
 
-                if( !Tick( delta, currt, ct ) )
-                    break;
+				if( !Tick( delta, currt, ct ) )
+					break;
 
-                lastTime = currTime;
+				lastTime = currTime;
 
 				//if( noGC )
 				//	GC.EndNoGCRegion();
@@ -92,8 +92,8 @@ namespace MyGameServer {
 				_ = Thread.Yield();
 			}
 
-            sw.Stop();
-        }
+			sw.Stop();
+		}
 
 		public bool Tick( double deltaTime, ulong currTime, CancellationToken ct ) {
 			CurrentTimeLong = currTime;
@@ -149,10 +149,10 @@ namespace MyGameServer {
 					continue;
 
 				tasks.Add( c.NetChans[chan].SendClass( pkt ) );
-            }
+			}
 
 			return (await Task.WhenAll( tasks )).All((r) => r);
-        }
+		}
 
 		public async Task<bool> SendGSSAll<T>( ChannelType chan, T pkt, ulong entityID, Enums.GSS.Controllers? controllerID = null, INetworkPlayer ignore = null ) where T : class {
 			var tasks = new List<Task<bool>>();
@@ -163,7 +163,7 @@ namespace MyGameServer {
 				if( c == ignore )
 					continue;
 
-				tasks.Add( c.NetChans[chan].SendGSSClass( pkt, entityID, controllerID ); );
+				tasks.Add( c.NetChans[chan].SendGSSClass( pkt, entityID, controllerID ) );
 			}
 
 			return (await Task.WhenAll( tasks )).All( ( r ) => r );

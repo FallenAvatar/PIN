@@ -1,33 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 using MyGameServer.Packets.GSS.Character.BaseController;
+using MyGameServer.Packets.GSS.Generic;
+
+using Serilog.Core;
 
 using Shared.Udp;
 
 namespace MyGameServer.Controllers.Character {
 	[ControllerID( Enums.GSS.Controllers.Character_BaseController )]
 	public class BaseController : Base {
-		public override void Init( INetworkClient client, IPlayer player, IShard shard ) {
-			client.NetChans[ChannelType.ReliableGss].SendGSSClass( Test.GSS.Character.BaseController.KeyFrame.Test( player, shard ), player.EntityID, msgEnumType: typeof( Enums.GSS.Character.Events ) );
-			client.NetChans[ChannelType.ReliableGss].SendGSSClass( new Packets.GSS.Character.CombatController.KeyFrame( shard ) { PlayerID = player.CharacterID }, player.EntityID, msgEnumType: typeof( Enums.GSS.Character.Events ) );
-			client.NetChans[ChannelType.ReliableGss].SendGSSClass( new Packets.GSS.Character.LocalEffectsController.KeyFrame( shard ) { PlayerID = player.CharacterID }, player.EntityID, msgEnumType: typeof( Enums.GSS.Character.Events ) );
-			client.NetChans[ChannelType.ReliableGss].SendGSSClass( new Packets.GSS.Character.MissionAndMarkerController.KeyFrame( shard ) { PlayerID = player.CharacterID }, player.EntityID, msgEnumType: typeof( Enums.GSS.Character.Events ) );
-			client.NetChans[ChannelType.ReliableGss].SendGSSClass( new CharacterLoaded(), player.EntityID, msgEnumType: typeof( Enums.GSS.Character.Events ) );
+		public async override Task Init( INetworkPlayer player, IShard shard ) {
+			_ = await shard.SendGSSTo( player, ChannelType.ReliableGss, Test.GSS.Character.BaseController.KeyFrame.Test( player, shard ), player.EntityID );
+			_ = await shard.SendGSSTo( player, ChannelType.ReliableGss, new Packets.GSS.Character.CombatController.KeyFrame( shard ) { PlayerID = player.CharacterID }, player.EntityID );
+			_ = await shard.SendGSSTo( player, ChannelType.ReliableGss, new Packets.GSS.Character.LocalEffectsController.KeyFrame( shard ) { PlayerID = player.CharacterID }, player.EntityID );
+			_ = await shard.SendGSSTo( player, ChannelType.ReliableGss, new Packets.GSS.Character.MissionAndMarkerController.KeyFrame( shard ) { PlayerID = player.CharacterID }, player.EntityID );
+			_ = await shard.SendGSSTo( player, ChannelType.ReliableGss, new CharacterLoaded(), player.EntityID );
 		}
 
 		[MessageID( (byte)Enums.GSS.Character.Commands.FetchQueueInfo )]
-		public void FetchQueueInfo( INetworkClient client, IPlayer player, ulong EntityID, Packets.GamePacket packet ) {
+		public void FetchQueueInfo( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
 		}
 
 		[MessageID( (byte)Enums.GSS.Character.Commands.PlayerReady )]
-		public void PlayerReady( INetworkClient client, IPlayer player, ulong EntityID, Packets.GamePacket packet ) {
+		public void PlayerReady( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
 			player.Ready();
 		}
 
 		[MessageID( (byte)Enums.GSS.Character.Commands.MovementInput )]
-		public void MovementInput( INetworkClient client, IPlayer player, ulong EntityID, Packets.GamePacket packet ) {
+		public async Task MovementInput( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
 			if( packet.BytesRemaining < 64 )
 				return;
 
@@ -62,18 +66,36 @@ namespace MyGameServer.Controllers.Character {
 				NextShortTime = unchecked((ushort)(pkt.ShortTime + 90))
 			};
 
-			client.NetChans[ChannelType.UnreliableGss].SendGSSClass( resp, player.EntityID, msgEnumType: typeof( Enums.GSS.Character.Events ) );
+			_ = await shard.SendGSSTo( player, ChannelType.UnreliableGss, resp, player.EntityID );
 
 			if( player.CharacterEntity.LastJumpTime.HasValue && pkt.LastJumpTimer > player.CharacterEntity.LastJumpTime.Value )
 				player.Jump();
 		}
 
 		[MessageID( (byte)Enums.GSS.Character.Commands.SetMovementSimulation )]
-		public void SetMovementSimulation( INetworkClient client, IPlayer player, ulong EntityID, Packets.GamePacket packet ) {
+		public void SetMovementSimulation( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
 		}
 
 		[MessageID( (byte)Enums.GSS.Character.Commands.BagInventorySettings )]
-		public void BagInventorySettings( INetworkClient client, IPlayer player, ulong EntityID, Packets.GamePacket packet ) {
+		public void BagInventorySettings( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
+		}
+
+		[MessageID( (byte)Enums.GSS.Character.Commands.PerformTextChat )]
+		public async Task PerformTextChat( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
+			var pkt = packet.Read<PerformTextChat>();
+
+			Program.Logger.Warning( "Chat = [{0}] {1} {2:X2}", player.CharacterEntity.CharData.Name, pkt.Message, pkt.Channel );
+
+			var msgs = new ChatMessageList();
+			msgs.Messages.Add( new ChatMessage {
+				SenderID = player.EntityID,
+				SenderName = player.CharacterEntity.CharData.Name,
+				Message = pkt.Message,
+				Channel = pkt.Channel
+			});
+
+			// FIXME: Message 118 is received by client but not displayed?
+			_ = await shard.SendGSSAll( ChannelType.UnreliableGss, msgs, shard.InstanceID );
 		}
 	}
 }

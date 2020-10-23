@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 using MyGameServer.Packets;
 
 namespace MyGameServer.Controllers.Character {
 	[ControllerID(Enums.GSS.Controllers.Character_MissionAndMarkerController)]
 	public class MissionAndMarkerController : Base {
-		public override void Init( INetworkClient client, IPlayer player, IShard shard ) {
+		public async override Task Init( INetworkPlayer player, IShard shard ) {
 
 		}
 
 		[MessageID((byte)Enums.GSS.Character.Commands.RequestAllAchievements)]
-		public void RequestAllAchievements( INetworkClient client, IPlayer player, ulong EntityID, Packets.GamePacket packet ) {
+		public void RequestAllAchievements( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
 			// TODO: Implement
 		}
 
 		[MessageID((byte)Enums.GSS.Character.Commands.TryResumeTutorialChain)]
-		public void TryResumeTutorialChain( INetworkClient client, IPlayer player, ulong EntityID, Packets.GamePacket packet ) {
+		public void TryResumeTutorialChain( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
 			// TODO: Implement
 		}
 	}

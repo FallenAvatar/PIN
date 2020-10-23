@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 using MyGameServer.Data;
 
@@ -30,7 +31,7 @@ namespace MyGameServer {
 
 		void Init(IShard shard);
 
-		void Login( ulong charID );
+		Task Login( ulong charID );
 		void Ready();
 		void Respawn( );
 		void Jump( );

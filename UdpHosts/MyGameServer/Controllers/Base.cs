@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 using MyGameServer.Extensions;
 using MyGameServer.Packets;
@@ -16,13 +19,13 @@ namespace MyGameServer.Controllers {
 			try {
 				ControllerID = GetType().GetAttribute<ControllerIDAttribute>().ControllerID;
 			} catch {
-				throw new MissingMemberException(this.GetType().FullName, "Missing required ControllerID attribute");
+				throw new MissingMemberException(GetType().FullName, "ControllerIDAttribute" );
 			}
 		}
 
-		public abstract void Init( INetworkClient client, IPlayer player, IShard shard );
+		public abstract Task Init( INetworkPlayer player, IShard shard );
 
-		public void HandlePacket(INetworkClient client, IPlayer player, ulong EntityID, byte MsgID, GamePacket packet) {
+		public void HandlePacket( INetworkPlayer player, IShard shard, ulong EntityID, byte MsgID, GamePacket packet) {
 			var method = ReflectionUtils.FindMethodsByAttribute<MessageIDAttribute>(this).Where(( mi ) => mi.GetAttribute<MessageIDAttribute>().MsgID == MsgID).FirstOrDefault();
 
 			if( method == null ) {
@@ -31,7 +34,11 @@ namespace MyGameServer.Controllers {
 				return;
 			}
 
-			_ = method.Invoke(this, new object[] { client, player, EntityID, packet });
+			// if method is async (and actually async, not just awaitable)
+			if( method.ReturnType != null && (method.ReturnType == typeof( Task ) || method.ReturnType.GetMethod( nameof( Task.GetAwaiter ) ) != null) && method.GetCustomAttribute<AsyncStateMachineAttribute>() != null )
+				_ = method.Invoke( this, new object[] { player, shard, EntityID, packet } );
+			else
+				_ = Task.Run(() => method.Invoke( this, new object[] { player, shard, EntityID, packet } ) );
 		}
 	}
 }

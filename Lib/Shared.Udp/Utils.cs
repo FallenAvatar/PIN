@@ -110,7 +110,7 @@ namespace Shared.Udp {
 				while( l < data.Length && data.Span[l] != 0x00 )
 					l++;
 
-				ret = Encoding.ASCII.GetString( data.Slice( 0, l - 1 ).Span.ToArray() );
+				ret = Encoding.ASCII.GetString( data.Slice( 0, l ).Span.ToArray() );
 				data = data.Slice( l );
 			} else if( t.IsClass ) {
 				ret = ReadClass( ref data, t );
