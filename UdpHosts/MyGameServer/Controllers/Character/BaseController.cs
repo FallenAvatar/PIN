@@ -91,7 +91,7 @@ namespace MyGameServer.Controllers.Character {
 			msgs.Messages.Add( new ChatMessage {
 				SenderID = player.EntityID,
 				SenderName = player.CharacterEntity.CharData.Name,
-				Message = pkt.Message+" ["+ channel + "]",
+				Message = pkt.Message,
 				Channel = pkt.Channel == 0 ? ChatChannel.Zone : pkt.Channel
 			} );
 
