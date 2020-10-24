@@ -250,8 +250,18 @@ namespace Shared.Udp {
 					ret.Add( WriteClass( o, t ) );
 				} else if( t.IsPrimitive || o is Half ) {
 					ret.Add( WritePrimitive( o, t ) );
+				} else if( t.IsValueType && t.BaseType == typeof( Enum ) ) {
+					ret.Add( WritePrimitive( Convert.ChangeType( o, Enum.GetUnderlyingType( t ) ), Enum.GetUnderlyingType( t ) ) );
 				} else if( t.IsValueType ) {
-					throw new Exception();
+					int size = Marshal.SizeOf(t);
+					Memory<byte> mem = new byte[size];
+					var mh = mem.Pin();
+
+					Marshal.StructureToPtr( o, new IntPtr( mh.Pointer ), false );
+
+					ret.Add( mem );
+
+					mh.Dispose();
 				}
 			}
 

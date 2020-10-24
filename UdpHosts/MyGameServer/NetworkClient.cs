@@ -58,8 +58,8 @@ namespace MyGameServer {
 				return;
 			}
 
-			if( Player.EntityID != EntityID )
-				Program.Logger.Fatal( "> GSS Player.EntityID != EntityID [{0} != {1}]", Player.EntityID, EntityID );
+			if( Player.EntityID != EntityID && EntityID != AssignedShard.InstanceID )
+				Program.Logger.Fatal( "> GSS EntityID != Player.EntityID || AssignedShard.InstanceID [{0:X16} != {1:X16} || {2:X16}]", EntityID, Player.EntityID, AssignedShard.InstanceID );
 
 			Program.Logger.Verbose("--> {0}: Controller = {1} Entity = 0x{2:X16} MsgID = {3}", packet.Header.Channel, ControllerID, EntityID, MsgID);
 			conn.HandlePacket( Player, AssignedShard, EntityID, MsgID, packet );

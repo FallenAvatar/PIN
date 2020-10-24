@@ -310,7 +310,7 @@ namespace MyGameServer.Enums {
 				ResourceNodeCompletedEvent = 137,
 				FoundResourceAreas = 138,
 				GeographicalReportResponse = 139,
-				ResourceLocationInfosRespons = 140,
+				ResourceLocationInfosResponse = 140,
 				UiNamedVariableUpdate = 141,
 				DuelNotification = 142,
 				NewUiQuery = 143,

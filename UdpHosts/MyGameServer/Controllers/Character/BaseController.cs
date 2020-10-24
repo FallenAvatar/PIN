@@ -80,21 +80,21 @@ namespace MyGameServer.Controllers.Character {
 		public void BagInventorySettings( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
 		}
 
+		static byte channel = 4;
 		[MessageID( (byte)Enums.GSS.Character.Commands.PerformTextChat )]
 		public async Task PerformTextChat( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
 			var pkt = packet.Read<PerformTextChat>();
 
-			Program.Logger.Warning( "Chat = [{0}] {1} {2:X2}", player.CharacterEntity.CharData.Name, pkt.Message, pkt.Channel );
+			Program.Logger.Information( "[{2}] {0}: {1}", player.CharacterEntity.CharData.Name, pkt.Message, pkt.Channel );
 
 			var msgs = new ChatMessageList();
 			msgs.Messages.Add( new ChatMessage {
 				SenderID = player.EntityID,
 				SenderName = player.CharacterEntity.CharData.Name,
-				Message = pkt.Message,
+				Message = pkt.Message+" ["+ channel + "]",
 				Channel = pkt.Channel
-			});
+			} );
 
-			// FIXME: Message 118 is received by client but not displayed?
 			_ = await shard.SendGSSAll( ChannelType.UnreliableGss, msgs, shard.InstanceID );
 		}
 	}

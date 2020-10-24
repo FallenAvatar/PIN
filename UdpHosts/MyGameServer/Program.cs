@@ -10,7 +10,7 @@ namespace MyGameServer {
 		public static ILogger Logger { get; protected set; }
 		static void Main( string[] args ) {
 			Logger = new LoggerConfiguration()
-				.MinimumLevel.Verbose()
+				.MinimumLevel.Information()
 				.WriteTo.Console(theme: Shared.Common.SerilogTheme.Custom)
 				.CreateLogger();
 
