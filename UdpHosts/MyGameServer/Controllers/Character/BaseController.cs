@@ -92,7 +92,7 @@ namespace MyGameServer.Controllers.Character {
 				SenderID = player.EntityID,
 				SenderName = player.CharacterEntity.CharData.Name,
 				Message = pkt.Message+" ["+ channel + "]",
-				Channel = pkt.Channel
+				Channel = pkt.Channel == 0 ? ChatChannel.Zone : pkt.Channel
 			} );
 
 			_ = await shard.SendGSSAll( ChannelType.UnreliableGss, msgs, shard.InstanceID );
