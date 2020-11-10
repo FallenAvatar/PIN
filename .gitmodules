@@ -1,3 +1,6 @@
 [submodule "Lib/Bitter"]
 	path = Lib/Bitter
 	url = https://github.com/freakbyte/Bitter.git
+[submodule "Lib/FauFau"]
+	path = Lib/FauFau
+	url = git@github.com:themeldingwars/FauFau.git
