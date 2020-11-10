@@ -33,8 +33,8 @@ namespace MyGameServer {
 			Status = IPlayer.PlayerStatus.Connecting;
 		}
 
-		public void Init( IShard shard ) {
-			Init( this, shard, shard );
+		public void Init( IShard shard, IPacketSender s ) {
+			Init( this, shard, s );
 		}
 
 		public async Task Login( ulong charID ) {

@@ -22,11 +22,11 @@ namespace MyGameServer.Controllers.Character {
 		}
 
 		[MessageID( (byte)Enums.GSS.Character.Commands.FetchQueueInfo )]
-		public void FetchQueueInfo( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
+		public async Task FetchQueueInfo( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
 		}
 
 		[MessageID( (byte)Enums.GSS.Character.Commands.PlayerReady )]
-		public void PlayerReady( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
+		public async Task PlayerReady( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
 			player.Ready();
 		}
 
@@ -73,14 +73,13 @@ namespace MyGameServer.Controllers.Character {
 		}
 
 		[MessageID( (byte)Enums.GSS.Character.Commands.SetMovementSimulation )]
-		public void SetMovementSimulation( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
+		public async Task SetMovementSimulation( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
 		}
 
 		[MessageID( (byte)Enums.GSS.Character.Commands.BagInventorySettings )]
-		public void BagInventorySettings( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
+		public async Task BagInventorySettings( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
 		}
 
-		static byte channel = 4;
 		[MessageID( (byte)Enums.GSS.Character.Commands.PerformTextChat )]
 		public async Task PerformTextChat( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
 			var pkt = packet.Read<PerformTextChat>();

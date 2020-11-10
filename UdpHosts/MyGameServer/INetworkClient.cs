@@ -26,10 +26,10 @@ namespace MyGameServer {
 		ImmutableDictionary<ChannelType, Channel> NetChans { get; }
 		IShard AssignedShard { get; }
 
-		void Init( INetworkPlayer player, IShard shard, IPacketSender sender);
+		void Init( INetworkPlayer player, IShard shard, IPacketSender s );
 		void HandlePacket( ReadOnlyMemory<byte> data, Packet packet );
 		void NetworkTick( double deltaTime, ulong currTime, CancellationToken ct );
-		void Send( Memory<byte> p );
+		//void Send( Memory<byte> p );
 		void SendAck( ChannelType forChannel, ushort forSeqNumber, DateTime? recvd = null );
 	}
 }

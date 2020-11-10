@@ -17,7 +17,7 @@ using Shared.Common;
 using Shared.Udp;
 
 namespace MyGameServer {
-	public class Shard : IShard, IPacketSender {
+	public class Shard : IShard {
 		public const double NetworkTickRate = 1.0 / 20.0;
 		protected long startTime;
 		public DateTime StartTime { get { return DateTimeExtensions.Epoch.AddSeconds( startTime ); } }
@@ -25,19 +25,20 @@ namespace MyGameServer {
 		public IDictionary<uint, INetworkPlayer> Clients { get; protected set; }
 		public IPacketSender NetServer { get; }
 		public IDictionary<ulong, IEntity> Entities { get; protected set; }
-		public PhysicsEngine Physics { get; protected set; }
-		public AIEngine AI { get; protected set; }
+		public IDictionary<Systems.SystemType, Systems.ISystem> Systems { get; }
 		public ulong InstanceID { get; }
 		public ulong CurrentTimeLong { get; protected set; }
 		public IDictionary<ushort, Tuple<IEntity, Enums.GSS.Controllers>> EntityRefMap { get; }
 		private ushort LastEntityRefId;
 		protected Thread runThread;
+		protected FauFau.Formats.StaticDB StaticDB;
 
 		public Shard( double gameTickRate, ulong instID, IPacketSender netServer ) {
 			Clients = new ConcurrentDictionary<uint, INetworkPlayer>();
 			Entities = new ConcurrentDictionary<ulong, IEntity>();
-			Physics = new PhysicsEngine( gameTickRate );
-			AI = new AIEngine();
+			Systems = new Dictionary<Systems.SystemType, Systems.ISystem>();
+			Systems.Add( MyGameServer.Systems.SystemType.AI, new Systems.AIEngine() );
+			Systems.Add( MyGameServer.Systems.SystemType.Physics, new Systems.PhysicsEngine( gameTickRate ) );
 
 			NetServer = netServer;
 			InstanceID = instID;
@@ -61,6 +62,9 @@ namespace MyGameServer {
 			var lastTime = 0.0;
 			ulong currTime;
 			double delta;
+
+			StaticDB = new FauFau.Formats.StaticDB();
+			StaticDB.Read( @"D:\Games\Firefall\system\db\clientdb.sd2" );
 
 			sw.Start();
 
@@ -101,8 +105,8 @@ namespace MyGameServer {
 				c.Tick( deltaTime, currTime, ct );
 			}
 
-			AI.Tick( deltaTime, currTime, ct );
-			Physics.Tick( deltaTime, currTime, ct );
+			foreach( var sys in Systems )
+				sys.Value.Tick( deltaTime, currTime, ct );
 
 			return true;
 		}
@@ -120,15 +124,13 @@ namespace MyGameServer {
 			if( Clients.ContainsKey( player.SocketID ) )
 				return true;
 
-			player.Init( this );
+			player.Init( this, NetServer );
 
 			Clients.Add( player.SocketID, player );
 			//Entities.Add(player.CharacterEntity.EntityID, player.CharacterEntity);
 
 			return true;
 		}
-
-		public async Task<bool> Send( Memory<byte> p, IPEndPoint ep ) => await NetServer.Send( p, ep );
 
 		public ushort AssignNewRefId( IEntity entity, Enums.GSS.Controllers controller ) {
 			while( EntityRefMap.ContainsKey( unchecked(++LastEntityRefId) ) || LastEntityRefId == 0 || LastEntityRefId == 0xffff )
@@ -141,14 +143,13 @@ namespace MyGameServer {
 
 		public async Task<bool> SendAll<T>( ChannelType chan, T pkt, INetworkPlayer ignore = null ) where T : class {
 			var tasks = new List<Task<bool>>();
-
-			// TODO: Channel.GetBytes(..) once and send to all clients
+			var p = Channel.GetBytes(pkt);
 
 			foreach( var c in Clients.Values ) {
 				if( c == ignore )
 					continue;
 
-				tasks.Add( c.NetChans[chan].SendClass( pkt ) );
+				tasks.Add( c.NetChans[chan].Send( p ) );
 			}
 
 			return (await Task.WhenAll( tasks )).All((r) => r);
@@ -156,14 +157,13 @@ namespace MyGameServer {
 
 		public async Task<bool> SendGSSAll<T>( ChannelType chan, T pkt, ulong entityID, Enums.GSS.Controllers? controllerID = null, INetworkPlayer ignore = null ) where T : class {
 			var tasks = new List<Task<bool>>();
-
-			// TODO: Channel.GetGSSBytes(..) once and send to all clients
+			var p = Channel.GetGSSBytes(pkt,entityID, controllerID);
 
 			foreach( var c in Clients.Values ) {
 				if( c == ignore )
 					continue;
 
-				tasks.Add( c.NetChans[chan].SendGSSClass( pkt, entityID, controllerID ) );
+				tasks.Add( c.NetChans[chan].Send( p ) );
 			}
 
 			return (await Task.WhenAll( tasks )).All( ( r ) => r );

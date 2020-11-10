@@ -15,7 +15,7 @@ namespace MyGameServer.Controllers {
 		}
 
 		[MessageID((byte)Enums.GSS.Generic.Commands.ScheduleUpdateRequest)]
-		public void ScheduleUpdateRequest( INetworkPlayer player, IShard shard, ulong EntityID, GamePacket packet ) {
+		public async Task ScheduleUpdateRequest( INetworkPlayer player, IShard shard, ulong EntityID, GamePacket packet ) {
 			var req = packet.Read<Packets.GSS.Generic.ScheduleUpdateRequest>();
 
 			player.LastRequestedUpdate = shard.CurrentTime;

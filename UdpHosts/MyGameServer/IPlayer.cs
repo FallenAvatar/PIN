@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 using MyGameServer.Data;
 
+using Shared.Udp;
+
 namespace MyGameServer {
 	public interface IPlayer {
 		public enum PlayerStatus {
@@ -29,7 +31,7 @@ namespace MyGameServer {
 		uint RequestedClientTime { get; set; }
 		bool FirstUpdateRequested { get; set; }
 
-		void Init(IShard shard);
+		void Init(IShard shard, IPacketSender s );
 
 		Task Login( ulong charID );
 		void Ready();

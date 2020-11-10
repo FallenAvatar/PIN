@@ -14,7 +14,7 @@ namespace MyGameServer.Controllers {
 		}
 
 		[MessageID((byte)Enums.GSS.Generic.Commands.RequestLogout)]
-		public void RequestLogout( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
+		public async Task RequestLogout( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
 		}
 	}
 }

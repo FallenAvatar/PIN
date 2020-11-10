@@ -27,12 +27,12 @@ namespace MyGameServer {
 		private static readonly byte[] xorByte = new byte[] { 0x00, 0xFF, 0xCC, 0xAA };
 		private static readonly ulong[] xorULong = new ulong[] { 0x00, 0xFFFFFFFFFFFFFFFF, 0xCCCCCCCCCCCCCCCC, 0xAAAAAAAAAAAAAAAA };
 
-		public static Dictionary<ChannelType, Channel> GetChannels( INetworkClient client ) {
+		public static Dictionary<ChannelType, Channel> GetChannels( INetworkClient client, IPacketSender s ) {
 			return new Dictionary<ChannelType, Channel>() {
-				{ ChannelType.Control, new Channel(ChannelType.Control, false, false, client) },
-				{ ChannelType.Matrix, new Channel(ChannelType.Matrix, true, true, client) },
-				{ ChannelType.ReliableGss, new Channel(ChannelType.ReliableGss, true, true, client) },
-				{ ChannelType.UnreliableGss, new Channel(ChannelType.UnreliableGss, true, false, client) },
+				{ ChannelType.Control, new Channel(ChannelType.Control, false, false, client, s) },
+				{ ChannelType.Matrix, new Channel(ChannelType.Matrix, true, true, client, s) },
+				{ ChannelType.ReliableGss, new Channel(ChannelType.ReliableGss, true, true, client, s) },
+				{ ChannelType.UnreliableGss, new Channel(ChannelType.UnreliableGss, true, false, client, s) },
 			};
 		}
 
@@ -47,14 +47,16 @@ namespace MyGameServer {
 		public event PacketAvailableDelegate PacketAvailable;
 
 		protected INetworkClient client;
+		protected IPacketSender sender;
 		protected ConcurrentQueue<GamePacket> incomingPackets;
 		protected ConcurrentQueue<Memory<byte>> outgoingPackets;
 
-		protected Channel( ChannelType ct, bool isSequenced, bool isReliable, INetworkClient c ) {
+		protected Channel( ChannelType ct, bool isSequenced, bool isReliable, INetworkClient c, IPacketSender s ) {
 			Type = ct;
 			IsSequenced = isSequenced;
 			IsReliable = isReliable;
 			client = c;
+			sender = s;
 			CurrentSequenceNumber = 1;
 			LastAck = 0;
 
@@ -67,8 +69,12 @@ namespace MyGameServer {
 		}
 
 		public void Process( CancellationToken ct ) {
-			while( outgoingPackets.TryDequeue( out Memory<byte> qi ) ) {
-				client.Send( qi );
+			while( outgoingPackets.TryDequeue( out Memory<byte> p ) ) {
+				var t = new Memory<byte>(new byte[4 + p.Length]);
+				p.CopyTo( t.Slice( 4 ) );
+				Utils.WriteStruct( Utils.SimpleFixEndianess( client.SocketID ) ).CopyTo( t );
+
+				_ = sender.Send( t, client.RemoteEndpoint );
 				LastActivity = DateTime.Now;
 			}
 
@@ -122,146 +128,12 @@ namespace MyGameServer {
 			}
 		}
 
-		public async Task<bool> Send<T>( T pkt ) where T : struct {
-			Memory<byte> p;
-			if( pkt is IWritable write ) {
-				p = write.Write();
-			} else
-				p = Utils.WriteStruct( pkt );
-
-			var conMsgAttr = (typeof(T).GetCustomAttributes(typeof(ControlMessageAttribute), false).FirstOrDefault()) as ControlMessageAttribute;
-			var matMsgAttr = (typeof(T).GetCustomAttributes(typeof(MatrixMessageAttribute), false).FirstOrDefault()) as MatrixMessageAttribute;
-
-			if( conMsgAttr != null ) {
-				var msgID = conMsgAttr.MsgID;
-				var t = new Memory<byte>(new byte[1 + p.Length]);
-				p.CopyTo( t.Slice( 1 ) );
-				Utils.WritePrimitive( (byte)msgID ).CopyTo( t );
-				p = t;
-				Program.Logger.Verbose( "<-- {0}: MsgID = {1} ({2})", Type, msgID, (byte)msgID );
-			} else if( matMsgAttr != null ) {
-				var msgID = matMsgAttr.MsgID;
-				var t = new Memory<byte>(new byte[1 + p.Length]);
-				p.CopyTo( t.Slice( 1 ) );
-				Utils.WritePrimitive( (byte)msgID ).CopyTo( t );
-				p = t;
-				Program.Logger.Verbose( "<-- {0}: MsgID = {1} ({2})", Type, msgID, (byte)msgID );
-			} else
-				throw new Exception();
-
-			return await Send( p );
-		}
-
 		public async Task<bool> SendClass<T>( T pkt, Type msgEnumType = null ) where T : class {
-			Memory<byte> p;
-			if( pkt is IWritable write )
-				p = write.Write();
-			else
-				p = Utils.WriteClass( pkt );
-
-			var controlMsgAttr = (typeof(T).GetCustomAttributes(typeof(ControlMessageAttribute), false).FirstOrDefault()) as ControlMessageAttribute;
-			var matrixMsgAttr = (typeof(T).GetCustomAttributes(typeof(MatrixMessageAttribute), false).FirstOrDefault()) as MatrixMessageAttribute;
-			byte msgID;
-
-			if( controlMsgAttr != null )
-				msgID = (byte)controlMsgAttr.MsgID;
-			else if( matrixMsgAttr != null )
-				msgID = (byte)matrixMsgAttr.MsgID;
-			else
-				throw new Exception();
-
-			var t = new Memory<byte>(new byte[1 + p.Length]);
-			p.CopyTo( t.Slice( 1 ) );
-
-			Utils.WritePrimitive( msgID ).CopyTo( t );
-
-			p = t;
-
-			if( msgEnumType == null )
-				Program.Logger.Verbose( "<-- {0}: MsgID = 0x{1:X2}", Type, msgID );
-			else
-				Program.Logger.Verbose( "<-- {0}: MsgID = {1} (0x{2:X2})", Type, Enum.Parse( msgEnumType, Enum.GetName( msgEnumType, msgID ) ), msgID );
-
-			return await Send( p );
-		}
-
-		public async Task<bool> SendGSS<T>( T pkt, ulong entityID, Enums.GSS.Controllers? controllerID = null, Type msgEnumType = null ) where T : struct {
-			Memory<byte> p;
-			if( pkt is IWritable write ) {
-				p = write.Write();
-			} else
-				p = Utils.WriteStruct( pkt );
-
-			var gssMsgAttr = (typeof(T).GetCustomAttributes(typeof(GSSMessageAttribute), false).FirstOrDefault()) as GSSMessageAttribute;
-
-			if( gssMsgAttr != null ) {
-				var msgID = gssMsgAttr.MsgID;
-				var t = new Memory<byte>(new byte[9 + p.Length]);
-				p.CopyTo( t.Slice( 9 ) );
-
-				Utils.WritePrimitive( entityID ).CopyTo( t );
-
-				// Intentionally overwrite first byte of Entity ID
-				if( controllerID.HasValue )
-					Utils.WritePrimitive( (byte)controllerID.Value ).CopyTo( t );
-				else if( gssMsgAttr.ControllerID.HasValue )
-					Utils.WritePrimitive( (byte)gssMsgAttr.ControllerID.Value ).CopyTo( t );
-				else
-					throw new Exception();
-
-				Utils.WritePrimitive( msgID ).CopyTo( t.Slice( 8 ) );
-
-				p = t;
-
-				if( msgEnumType == null )
-					Program.Logger.Verbose( "<-- {0}: Controller = {1} Entity = 0x{2:X16} MsgID = 0x{3:X2}", Type, controllerID.HasValue ? controllerID.Value : gssMsgAttr.ControllerID.Value, entityID, msgID );
-				else
-					Program.Logger.Verbose( "<-- {0}: Controller = {1} Entity = 0x{2:X16} MsgID = {3} (0x{4:X2})", Type, controllerID.HasValue ? controllerID.Value : gssMsgAttr.ControllerID.Value, entityID, Enum.Parse( msgEnumType, Enum.GetName( msgEnumType, msgID ) ), msgID );
-			} else
-				throw new Exception();
-
-			return await Send( p );
+			return await Send( GetBytes(pkt) );
 		}
 
 		public async Task<bool> SendGSSClass<T>( T pkt, ulong entityID, Enums.GSS.Controllers? controllerID = null, Type msgEnumType = null ) where T : class {
-			Memory<byte> p;
-			if( pkt is IWritable write ) {
-				p = write.Write();
-			} else
-				p = Utils.WriteClass( pkt );
-
-			//Console.WriteLine( string.Concat( p.ToArray().Select( b => b.ToString( "X2" ) ).ToArray() ) );
-			var gssMsgAttr = (typeof(T).GetCustomAttributes(typeof(GSSMessageAttribute), false).FirstOrDefault()) as GSSMessageAttribute;
-
-			if( gssMsgAttr != null ) {
-				var msgID = gssMsgAttr.MsgID;
-				var t = new Memory<byte>(new byte[9 + p.Length]);
-				p.CopyTo( t.Slice( 9 ) );
-
-				Utils.WritePrimitive( entityID ).CopyTo( t );
-
-				// Intentionally overwrite first byte of Entity ID
-				if( controllerID.HasValue )
-					Utils.WritePrimitive( (byte)controllerID.Value ).CopyTo( t );
-				else if( gssMsgAttr.ControllerID.HasValue )
-					Utils.WritePrimitive( (byte)gssMsgAttr.ControllerID.Value ).CopyTo( t );
-				else
-					throw new Exception();
-
-				Utils.WritePrimitive( msgID ).CopyTo( t.Slice( 8 ) );
-
-				p = t;
-
-				if( msgEnumType == null )
-					Program.Logger.Verbose( "<-- {0}: Controller = {1} Entity = 0x{2:X16} MsgID = 0x{3:X2}", Type, controllerID.HasValue ? controllerID.Value : gssMsgAttr.ControllerID.Value, entityID, msgID );
-				else
-					Program.Logger.Verbose( "<-- {0}: Controller = {1} Entity = 0x{2:X16} MsgID = {3} (0x{4:X2})", Type, controllerID.HasValue ? controllerID.Value : gssMsgAttr.ControllerID.Value, entityID, Enum.Parse( msgEnumType, Enum.GetName( msgEnumType, msgID ) ), msgID );
-
-				//Program.Logger.Verbose( "<--- Sending {0} bytes", p.Length );
-			} else
-				throw new Exception();
-
-			return await Send( p );
+			return await Send( GetGSSBytes(pkt,entityID,controllerID) );
 		}
 
 		private const int ProtocolHeaderSize = 80; // UDP + IP
@@ -306,7 +178,7 @@ namespace MyGameServer {
 			return true;
 		}
 
-		public Memory<byte> GetBytes<T>( T pkt ) where T : class {
+		public static Memory<byte> GetBytes<T>( T pkt ) where T : class {
 			Memory<byte> p;
 			if( pkt is IWritable write )
 				p = write.Write();
@@ -334,7 +206,7 @@ namespace MyGameServer {
 			return p;
 		}
 
-		public Memory<byte> GetGSSBytes<T>( T pkt, ulong entityID, Enums.GSS.Controllers? controllerID = null ) where T : class {
+		public static Memory<byte> GetGSSBytes<T>( T pkt, ulong entityID, Enums.GSS.Controllers? controllerID = null ) where T : class {
 			Memory<byte> p;
 			if( pkt is IWritable write ) {
 				p = write.Write();

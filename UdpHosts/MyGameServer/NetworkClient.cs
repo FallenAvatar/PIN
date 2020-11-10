@@ -30,13 +30,12 @@ namespace MyGameServer {
 			NetLastActive = DateTime.Now;
 		}
 
-		public void Init( INetworkPlayer player, IShard shard, IPacketSender sender ) {
+		public void Init( INetworkPlayer player, IShard shard, IPacketSender s ) {
 			Player = player;
-			Sender = sender;
 			NetClientStatus = Status.Connecting;
 			AssignedShard = shard;
 
-			NetChans = Channel.GetChannels( this ).ToImmutableDictionary();
+			NetChans = Channel.GetChannels( this, s ).ToImmutableDictionary();
 			NetChans[ChannelType.Control].PacketAvailable += Control_PacketAvailable;
 			NetChans[ChannelType.Matrix].PacketAvailable += Matrix_PacketAvailable;
 			NetChans[ChannelType.ReliableGss].PacketAvailable += GSS_PacketAvailable;
@@ -123,7 +122,7 @@ namespace MyGameServer {
 			case Enums.ControlPacketType.TimeSyncRequest:
 				var req = packet.Read<Packets.Control.TimeSyncRequest>();
 
-				_ = NetChans[ChannelType.Control].Send( new Packets.Control.TimeSyncResponse( req.ClientTime, unchecked(AssignedShard.CurrentTimeLong*1000) ) );
+				_ = NetChans[ChannelType.Control].SendClass( new Packets.Control.TimeSyncResponse( req.ClientTime, unchecked(AssignedShard.CurrentTimeLong*1000) ) );
 				break;
 			case Enums.ControlPacketType.MTUProbe:
 				var mtuPkt = packet.Read<Packets.Control.MTUProbe>();

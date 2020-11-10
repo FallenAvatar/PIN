@@ -10,11 +10,10 @@ using MyGameServer.Data;
 using Shared.Udp;
 
 namespace MyGameServer {
-	public interface IShard : IInstance, IPacketSender {
+	public interface IShard : IInstance {
 		IDictionary<uint, INetworkPlayer> Clients { get; }
 		IPacketSender NetServer { get; }
-		PhysicsEngine Physics { get; }
-		AIEngine AI { get; }
+		IDictionary<Systems.SystemType, Systems.ISystem> Systems { get; }
 		int CurrentPlayers => Clients.Count;
 		ulong CurrentTimeLong { get; }
 		uint CurrentTime { get { return unchecked((uint)CurrentTimeLong); } }

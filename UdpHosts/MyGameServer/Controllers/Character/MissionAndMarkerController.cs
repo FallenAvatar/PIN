@@ -13,12 +13,12 @@ namespace MyGameServer.Controllers.Character {
 		}
 
 		[MessageID((byte)Enums.GSS.Character.Commands.RequestAllAchievements)]
-		public void RequestAllAchievements( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
+		public async Task RequestAllAchievements( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
 			// TODO: Implement
 		}
 
 		[MessageID((byte)Enums.GSS.Character.Commands.TryResumeTutorialChain)]
-		public void TryResumeTutorialChain( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
+		public async Task TryResumeTutorialChain( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
 			// TODO: Implement
 		}
 	}

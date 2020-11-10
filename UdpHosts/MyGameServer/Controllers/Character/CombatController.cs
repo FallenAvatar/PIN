@@ -12,12 +12,12 @@ namespace MyGameServer.Controllers.Character {
 		}
 
 		[MessageID((byte)Enums.GSS.Character.Commands.FireInputIgnored)]
-		public void FireInputIgnored( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
+		public async Task FireInputIgnored( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
 			// TODO: Implement
 		}
 
 		[MessageID((byte)Enums.GSS.Character.Commands.UseScope)]
-		public void UseScope( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
+		public async Task UseScope( INetworkPlayer player, IShard shard, ulong EntityID, Packets.GamePacket packet ) {
 			// TODO: Implement
 		}
 	}

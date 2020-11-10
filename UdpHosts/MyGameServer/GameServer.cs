@@ -39,6 +39,8 @@ namespace MyGameServer {
 		protected override void Startup( CancellationToken ct ) {
 			Test.DataUtils.Init();
 			Controllers.Factory.Init();
+
+			_ = NewShard( ct );
 		}
 
 		protected override async void ServerRunThread( CancellationToken ct ) {
