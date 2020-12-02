@@ -59,14 +59,14 @@ namespace Shared.Udp {
 			source = new CancellationTokenSource();
 			var ct = source.Token;
 
+			Startup( ct );
+
 			incomingPackets = new BufferBlock<Packet?>();
 			outgoingPackets = new BufferBlock<Packet?>();
 
 			var listenThread = Utils.RunThread(ListenThread, ct);
 			var runThread = Utils.RunThread(ServerRunThread, ct);
 			var sendThread = Utils.RunThread(SendThread, ct);
-
-			Startup(ct);
 
 			IsRunning = true;
 

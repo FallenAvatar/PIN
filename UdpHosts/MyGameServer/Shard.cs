@@ -18,6 +18,11 @@ using Shared.Udp;
 
 namespace MyGameServer {
 	public class Shard : IShard {
+		
+		public static IShard CurrentShard { get { return currShard; } }
+		[ThreadStatic]
+		private static IShard currShard;
+
 		public const double NetworkTickRate = 1.0 / 20.0;
 		protected long startTime;
 		public DateTime StartTime { get { return DateTimeExtensions.Epoch.AddSeconds( startTime ); } }
@@ -31,7 +36,6 @@ namespace MyGameServer {
 		public IDictionary<ushort, Tuple<IEntity, Enums.GSS.Controllers>> EntityRefMap { get; }
 		private ushort LastEntityRefId;
 		protected Thread runThread;
-		protected FauFau.Formats.StaticDB StaticDB;
 
 		public Shard( double gameTickRate, ulong instID, IPacketSender netServer ) {
 			Clients = new ConcurrentDictionary<uint, INetworkPlayer>();
@@ -63,8 +67,7 @@ namespace MyGameServer {
 			ulong currTime;
 			double delta;
 
-			StaticDB = new FauFau.Formats.StaticDB();
-			StaticDB.Read( @"D:\Games\Firefall\system\db\clientdb.sd2" );
+			currShard = this;
 
 			sw.Start();
 

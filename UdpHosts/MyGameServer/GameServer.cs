@@ -17,6 +17,7 @@ using System.Threading.Tasks.Dataflow;
 
 namespace MyGameServer {
 	class GameServer : PacketServer {
+		public static GameServer Instance { get; private set; }
 		public const double GameTickRate = 1.0 / 60.0;
 		public const int MinPlayersPerShard = 16;
 		public const int MaxPlayersPerShard = 64;
@@ -27,6 +28,7 @@ namespace MyGameServer {
 
 		protected byte nextShardID;
 		protected ulong ServerID;
+		public FauFau.Formats.StaticDB SDB { get; private set; }
 
 		public GameServer( ushort port, ulong serverID ) : base( port ) {
 			ClientMap = new ConcurrentDictionary<uint, INetworkPlayer>();
@@ -34,11 +36,20 @@ namespace MyGameServer {
 
 			nextShardID = 1;
 			ServerID = serverID;
+
+			Instance = this;
 		}
 
 		protected override void Startup( CancellationToken ct ) {
 			Test.DataUtils.Init();
 			Controllers.Factory.Init();
+
+			// Load sdb
+			var sdb_path = @"D:\Games\Firefall\system\db\clientdb.sd2";
+			Logger.Information( "Loading Static DB file \"{0}\".", sdb_path );
+			SDB = new FauFau.Formats.StaticDB();
+			SDB.Read( sdb_path );
+			Logger.Information( "Static DB file loaded." );
 
 			_ = NewShard( ct );
 		}
@@ -68,20 +79,7 @@ namespace MyGameServer {
 			return s;
 		}
 
-		//protected bool Tick( double deltaTime, ulong currTime, CancellationToken ct ) {
-		//	foreach( var s in Shards.Values ) {
-		//		if( !s.Tick( deltaTime, currTime ) || s.CurrentPlayers < MinPlayersPerShard ) {
-		//			// TODO: Shutdown Shard
-		//		}
-		//	}
-
-		//	return true;
-		//}
-
 		protected override void HandlePacket( Packet packet, CancellationToken ct ) {
-			//Program.Logger.Information("[GAME] {0} sent {1} bytes.", packet.RemoteEndpoint, packet.PacketData.Length);
-			//Program.Logger.Verbose(">  {0}", BitConverter.ToString(packet.PacketData.ToArray()).Replace("-", " "));
-
 			var socketID = Utils.SimpleFixEndianess(packet.Read<uint>());
 			INetworkClient client;
 

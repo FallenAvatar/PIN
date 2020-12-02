@@ -9,6 +9,7 @@ namespace Shared.Udp.Packets {
 		public static void Init() {
 			_instances = new ConcurrentDictionary<Type, IPacketView>();
 
+			
 			// TODO: Get appropriate interfaces
 			var types = new Type[0];
 			foreach( var t in types )

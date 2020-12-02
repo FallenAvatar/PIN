@@ -108,11 +108,11 @@ namespace MyGameServer {
 					//	data[i] ^= xorByte[packet.Header.ResendCount];
 
 					packet = new GamePacket( packet.Header, new ReadOnlyMemory<byte>( data ) );
-					Program.Logger.Fatal( "---> Resent packet!!! C:{0}: {1} bytes", Type, packet.TotalBytes );
+					Program.Logger.Fatal( "---> Received Resent packet!!! C:{0}: {1} bytes", Type, packet.TotalBytes );
 				}
 
 				if( packet.Header.IsSplit )
-					Program.Logger.Fatal( "---> Split packet!!! C:{0}: {1} bytes", Type, packet.TotalBytes );
+					Program.Logger.Fatal( "---> Received Split packet!!! C:{0}: {1} bytes", Type, packet.TotalBytes );
 
 				if( IsReliable && (seqNum > LastAck || (seqNum < 0xff && LastAck > 0xff00)) ) {
 					client.SendAck( Type, seqNum, packet.Recieved );
@@ -156,8 +156,8 @@ namespace MyGameServer {
 				p.Slice( 0, len - hdrLen ).CopyTo( t.Slice( hdrLen ) );
 
 				if( IsSequenced ) {
-					if( IsReliable )
-						Program.Logger.Verbose( "<- {0} SeqNum =  {1}", Type, CurrentSequenceNumber );
+					//if( IsReliable )
+					//	Program.Logger.Verbose( "<- {0} SeqNum =  {1}", Type, CurrentSequenceNumber );
 
 					Utils.WritePrimitive( Utils.SimpleFixEndianess( CurrentSequenceNumber ) ).CopyTo( t.Slice( 2, 2 ) );
 					unchecked { CurrentSequenceNumber++; }
