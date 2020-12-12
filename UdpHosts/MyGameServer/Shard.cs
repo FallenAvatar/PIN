@@ -18,11 +18,6 @@ using Shared.Udp;
 
 namespace MyGameServer {
 	public class Shard : IShard {
-		
-		//public static IShard CurrentShard { get { return currShard; } }
-		//[ThreadStatic]
-		//private static IShard currShard;
-
 		public const double NetworkTickRate = 1.0 / 20.0;
 		protected long startTime;
 		public DateTime StartTime { get { return DateTimeExtensions.Epoch.AddSeconds( startTime ); } }

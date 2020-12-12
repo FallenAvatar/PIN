@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace MyGameServer.Entities {
 	public class BaseEntity : IEntity {
-		public ulong EntityID { get; }
+		public ulong EntityID { get; set; }
 		public IShard Owner { get; }
 		public IDictionary<Enums.GSS.Controllers, ushort> ControllerRefMap { get; }
 

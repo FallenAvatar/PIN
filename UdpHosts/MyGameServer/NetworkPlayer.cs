@@ -41,6 +41,7 @@ namespace MyGameServer {
 			CharacterID = charID;
 			CharacterEntity = new Entities.Character( AssignedShard );
 			CharacterEntity.Load( charID );
+			//CharacterEntity.EntityID = charID & 0xffffffffffffff00;
 			AssignedShard.AddEntity( CharacterEntity );
 			Status = IPlayer.PlayerStatus.LoggedIn;
 
@@ -194,7 +195,7 @@ namespace MyGameServer {
 
 			} else if( Status == IPlayer.PlayerStatus.Playing ) {
 				if( AssignedShard.CurrentTime - lastKeyFrame > 0.5 ) {
-					NetChans[ChannelType.ReliableGss].SendGSSClass(Test.GSS.Character.BaseController.KeyFrame.Test(this, AssignedShard), this.CharacterEntity.EntityID, msgEnumType: typeof(Enums.GSS.Character.Events));
+					//NetChans[ChannelType.ReliableGss].SendGSSClass(Test.GSS.Character.BaseController.KeyFrame.Test(this, AssignedShard), this.CharacterEntity.EntityID, msgEnumType: typeof(Enums.GSS.Character.Events));
 				}
 			}
 		}

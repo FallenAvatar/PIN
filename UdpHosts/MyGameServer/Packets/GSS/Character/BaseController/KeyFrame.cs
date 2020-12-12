@@ -84,6 +84,7 @@ namespace MyGameServer.Packets.GSS.Character.BaseController {
 		[Field]
 		[Padding(9)]
 		public uint PrimaryWeaponID;
+
 		[Field]
 		[Padding(3)]
 		[LengthPrefixed(typeof(byte))]

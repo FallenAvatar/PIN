@@ -23,7 +23,7 @@ namespace MyGameServer {
 		}
 
 		ulong CharacterID { get; }
-		ulong EntityID { get { return (CharacterID & 0xffffffffffffff00); } } // Ignore last byte
+		ulong EntityID { get { return (CharacterEntity.EntityID & 0xffffffffffffff00); } } // Ignore last byte
 		Entities.Character CharacterEntity { get; }
 		PlayerStatus Status { get; }
 		Zone CurrentZone { get; }
