@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Shared.Udp;
 
 namespace MyGameServer.Packets.GSS.Character.BaseController {
-	[GSSMessage( Enums.GSS.Controllers.Character_BaseController, (byte)Enums.GSS.Character.Events.KeyFrame )]
+	[GSSMessage( Enums.GSS.Controllers.Character_BaseController, (byte)Enums.GSS.Character.Events.ControllerKeyFrame )]
 	public class KeyFrame {
 		[Field]
 		public ulong InstanceID;

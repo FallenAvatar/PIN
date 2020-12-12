@@ -7,7 +7,7 @@ using System.Text;
 using Shared.Udp;
 
 namespace MyGameServer.Packets.GSS.Character.CombatController {
-	[GSSMessage( Enums.GSS.Controllers.Character_CombatController, (byte)Enums.GSS.Character.Events.KeyFrame )]
+	[GSSMessage( Enums.GSS.Controllers.Character_CombatController, (byte)Enums.GSS.Character.Events.ControllerKeyFrame )]
 	public class KeyFrame {
 		[Field]
 		public ulong PlayerID;

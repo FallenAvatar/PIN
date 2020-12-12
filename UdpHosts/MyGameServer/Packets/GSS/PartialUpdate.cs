@@ -6,7 +6,7 @@ using System.Text;
 using Shared.Udp;
 
 namespace MyGameServer.Packets.GSS {
-    [GSSMessage( (byte)Enums.GSS.Character.Events.PartialUpdate )]
+    [GSSMessage( (byte)Enums.GSS.Character.Events.Update )]
     public class PartialUpdate {
         [Field]
         public IList<PartialView> Fields = new List<PartialView>();

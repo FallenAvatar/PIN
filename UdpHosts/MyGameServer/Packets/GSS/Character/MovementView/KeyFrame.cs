@@ -5,7 +5,7 @@ using System.Text;
 using Shared.Udp;
 
 namespace MyGameServer.Packets.GSS.Character.MovementView {
-    [GSSMessage( Enums.GSS.Controllers.Character_MovementView, (byte)Enums.GSS.Character.Events.KeyFrame )]
+    [GSSMessage( Enums.GSS.Controllers.Character_MovementView, (byte)Enums.GSS.Character.Events.ControllerKeyFrame )]
     public class KeyFrame {
 		[Field]
 		public float PosX;

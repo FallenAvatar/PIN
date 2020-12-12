@@ -6,7 +6,7 @@ using System.Text;
 using Shared.Udp;
 
 namespace MyGameServer.Packets.GSS.Character.MissionAndMarkerController {
-	[GSSMessage( Enums.GSS.Controllers.Character_MissionAndMarkerController, (byte)Enums.GSS.Character.Events.KeyFrame )]
+	[GSSMessage( Enums.GSS.Controllers.Character_MissionAndMarkerController, (byte)Enums.GSS.Character.Events.ControllerKeyFrame )]
 	public class KeyFrame {
 		[Field]
 		public ulong PlayerID;

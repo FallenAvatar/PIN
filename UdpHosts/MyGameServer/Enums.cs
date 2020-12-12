@@ -137,6 +137,7 @@ namespace MyGameServer.Enums {
 
 		namespace Generic {
 			public enum Events : byte {
+				RoutedMultipleMessage = 8,
 				EncounterToUIMessage = 32,
 				VotekickInitiated = 33,
 				VotekickResponded = 34,
@@ -245,14 +246,31 @@ namespace MyGameServer.Enums {
 				VotekickResponse = 28,
 				GlobalCounterRequest = 29,
 				CurrentLoadoutRequest = 30,
-				VendorProductReques = 31,
+				VendorProductRequest = 31,
 			}
 		}
+		namespace Shared {
+			enum Events {
+				Update = 1,
+				Checksum = 2,
+				ViewKeyFrame = 3,
+				ControllerKeyFrame = 4,
+				RemoveController = 5,
+				RemoveEntity = 6,
+				SetRefId = 9,
+			}
+        }
 
 		namespace Character {
 			enum Events {
-				PartialUpdate = 1,
-				KeyFrame = 4,
+				Update = Shared.Events.Update,
+				Checksum = Shared.Events.Checksum,
+				ViewKeyFrame = Shared.Events.ViewKeyFrame,
+				ControllerKeyFrame = Shared.Events.ControllerKeyFrame,
+				RemoveController = Shared.Events.RemoveController,
+				RemoveEntity = Shared.Events.RemoveEntity,
+				SetRefId = Shared.Events.SetRefId,
+
 				MarketRequestComplete = 83,
 				ReceiveWeaponTweaks = 84,
 				TookDebugWeaponHitPublic = 85,
@@ -544,8 +562,14 @@ namespace MyGameServer.Enums {
 
 		namespace AreaVisualData {
 			enum Events {
-				PartialUpdate = 1,
-				KeyFrame = 4,
+				Update = Shared.Events.Update,
+				Checksum = Shared.Events.Checksum,
+				ViewKeyFrame = Shared.Events.ViewKeyFrame,
+				ControllerKeyFrame = Shared.Events.ControllerKeyFrame,
+				RemoveController = Shared.Events.RemoveController,
+				RemoveEntity = Shared.Events.RemoveEntity,
+				SetRefId = Shared.Events.SetRefId,
+
 				LootObjectCollected = 83,
 				AudioEmitterSpawned = 84,
 				ParticleEffectSpawned = 85,
@@ -553,20 +577,15 @@ namespace MyGameServer.Enums {
 		}
 
 		namespace Vehicle {
-			enum Commands {
-				MovementInput = 83,
-				MovementInputFake = 84,
-				SinAcquire_Source = 85,
-				ReceiveCollisionDamage = 86,
-				ActivateAbility = 87,
-				DeactivateAbility = 88,
-				SetWaterLevelAndDesc = 89,
-				SetEffectsFlag = 90,
-			}
-
 			enum Events {
-				PartialUpdate = 1,
-				KeyFrame = 4,
+				Update = Shared.Events.Update,
+				Checksum = Shared.Events.Checksum,
+				ViewKeyFrame = Shared.Events.ViewKeyFrame,
+				ControllerKeyFrame = Shared.Events.ControllerKeyFrame,
+				RemoveController = Shared.Events.RemoveController,
+				RemoveEntity = Shared.Events.RemoveEntity,
+				SetRefId = Shared.Events.SetRefId,
+
 				AbilityActivated = 83,
 				AbilityFailed = 84,
 				PublicCombatLog = 85,
@@ -577,24 +596,45 @@ namespace MyGameServer.Enums {
 				FlipPunch = 90,
 				DebugMovementUpdate = 91,
 			}
+
+			enum Commands {
+				MovementInput = 83,
+				MovementInputFake = 84,
+				SinAcquire_Source = 85,
+				ReceiveCollisionDamage = 86,
+				ActivateAbility = 87,
+				DeactivateAbility = 88,
+				SetWaterLevelAndDesc = 89,
+				SetEffectsFlag = 90,
+			}
 		}
 
 		namespace Deployable {
 			enum Events {
-				PartialUpdate = 1,
-				KeyFrame = 4,
+				Update = Shared.Events.Update,
+				Checksum = Shared.Events.Checksum,
+				ViewKeyFrame = Shared.Events.ViewKeyFrame,
+				ControllerKeyFrame = Shared.Events.ControllerKeyFrame,
+				RemoveController = Shared.Events.RemoveController,
+				RemoveEntity = Shared.Events.RemoveEntity,
+				SetRefId = Shared.Events.SetRefId,
+
 				TookHit = 83,
 				AbilityProjectileFired = 84,
 				PublicCombatLog = 85,
 			}
-
-
 		}
 
 		namespace Turret {
 			enum Events {
-				PartialUpdate = 1,
-				KeyFrame = 4,
+				Update = Shared.Events.Update,
+				Checksum = Shared.Events.Checksum,
+				ViewKeyFrame = Shared.Events.ViewKeyFrame,
+				ControllerKeyFrame = Shared.Events.ControllerKeyFrame,
+				RemoveController = Shared.Events.RemoveController,
+				RemoveEntity = Shared.Events.RemoveEntity,
+				SetRefId = Shared.Events.SetRefId,
+
 				WeaponProjectileFired = 83,
 			}
 
@@ -609,8 +649,14 @@ namespace MyGameServer.Enums {
 
 		namespace LootStoreExtensions {
 			enum Events {
-				PartialUpdate = 1,
-				KeyFrame = 4,
+				Update = Shared.Events.Update,
+				Checksum = Shared.Events.Checksum,
+				ViewKeyFrame = Shared.Events.ViewKeyFrame,
+				ControllerKeyFrame = Shared.Events.ControllerKeyFrame,
+				RemoveController = Shared.Events.RemoveController,
+				RemoveEntity = Shared.Events.RemoveEntity,
+				SetRefId = Shared.Events.SetRefId,
+
 				LootObjectCollected = 83,
 			}
 		}

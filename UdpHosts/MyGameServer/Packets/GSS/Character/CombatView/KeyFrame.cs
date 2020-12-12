@@ -5,7 +5,7 @@ using System.Text;
 using Shared.Udp;
 
 namespace MyGameServer.Packets.GSS.Character.CombatView {
-    [GSSMessage( Enums.GSS.Controllers.Character_CombatView, (byte)Enums.GSS.Character.Events.KeyFrame )]
+    [GSSMessage( Enums.GSS.Controllers.Character_CombatView, (byte)Enums.GSS.Character.Events.ControllerKeyFrame )]
     public class KeyFrame {
 		[Field]
 		public ushort BitFieldBytes;
