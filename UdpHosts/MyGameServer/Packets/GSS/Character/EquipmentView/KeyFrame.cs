@@ -1,65 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 using Shared.Udp;
 
-namespace MyGameServer.Packets.GSS.Character.BaseController {
-	[GSSMessage( Enums.GSS.Controllers.Character_BaseController, (byte)Enums.GSS.Character.Events.KeyFrame )]
-	public class KeyFrame {
-		[Field]
-		public ulong InstanceID;
-		[Field]
-		public uint UnkInt1;
-		[Field]
-		public uint UnkInt2;
-		[Padding(1)]
-		[Field]
-		public uint UsedInvSlots;
-		[Field]
-		public uint MaxInvSlots;
-		[Field]
-		[Padding(17)]
-		public string DisplayName;
-		[Field]
-		public string UniqueName;
-		[Field]
-		public byte Gender;
-		[Field]
-		public byte Race;
-		[Field]
-		public uint CharInfoID;
-		[Field]
-		public uint HeadMain;
-		[Field]
-		public uint Eyes;
-		[Field]
-		public byte UnkByte1;
-		[Field]
-		public byte IsNPC;
-		[Field]
-		public byte IsStaff;
-		[Field]
-		public uint CharTypeID;
-		[Field]
-		public uint VoiceSet;
-		[Field]
-		public ushort TitleID;
-		[Field]
-		public uint NameLocaliztionID;
-
-		[Field]
-		[LengthPrefixed(typeof(byte))]
-		public IList<uint> HeadAccessories = new List<uint>();
-		[Field]
-		public uint VehicleLoadout;
-		[Field]
-		public uint GliderLoadout;
-		[Field]
-		public Visuals CharacterVisuals = new Visuals();
-		[Field]
-		public string ArmyName;
-		[Field]
-		public uint KeyFrameTime_0;
+namespace MyGameServer.Packets.GSS.Character.EquipmentView {
+    [GSSMessage( Enums.GSS.Controllers.Character_EquipmentView, (byte)Enums.GSS.Character.Events.KeyFrame )]
+    public class KeyFrame {
 		[Field]
 		[Padding(1)]
 		public uint ChassisLoadout;
@@ -79,13 +26,12 @@ namespace MyGameServer.Packets.GSS.Character.BaseController {
 		[Field]
 		[LengthPrefixed(typeof(byte))]
 		public IList<Ability> Abilities = new List<Ability>();
-
 		[Field]
 		[Padding(9)]
 		public uint PrimaryWeaponID;
 		[Field]
 		[Length(3)]
-		public IList<byte> UnkBytes6 = new List<byte>();
+		public IList<byte> UnkBytes3 = new List<byte>();
 		[Field]
 		[LengthPrefixed(typeof(byte))]
 		public IList<WeaponModule> PrimaryWeaponModules = new List<WeaponModule>();
@@ -96,93 +42,22 @@ namespace MyGameServer.Packets.GSS.Character.BaseController {
 		public uint SecondaryWeaponID;
 		[Field]
 		[Length(3)]
-		public IList<byte> UnkBytes5 = new List<byte>();
+		public IList<byte> UnkBytes4 = new List<byte>();
 		[Field]
 		[LengthPrefixed(typeof(byte))]
-        public IList<WeaponModule> SecondaryWeaponModules = new List<WeaponModule>();
+		public IList<WeaponModule> SecondaryWeaponModules = new List<WeaponModule>();
 		[Field]
 		public Visuals SecondaryWeaponVisuals = new Visuals();
 		[Field]
-		[Padding(13)]
-		public uint LoadoutID;
+		public byte Level;
 		[Field]
-		public uint UnkSfxID_0a;
+		public byte EffectiveLevel;
 		[Field]
-		public ulong UnkSfxID_0b;
-		[Field]
-		public uint KeyFrameTime_1;
-		[Field]
-		//[Padding(4)]
-		public float PosX;
-		[Field]
-		public float PosY;
-		[Field]
-		public float PosZ;
-		[Field]
-		public float RotW;
-		[Field]
-		public float RotX;
-		[Field]
-		public float RotY;
-		[Field]
-		public float RotZ;
-		[Field]
-		public float AimX;
-		[Field]
-		public float AimY;
-		[Field]
-		public float AimZ;
-		[Field]
-		public float VelX;
-		[Field]
-		public float VelY;
-		[Field]
-		public float VelZ;
-		[Field]
-		public ushort MovementState;
-		[Field]
-		[Padding(2)]
-		public ushort Jets;
-		[Field]
-		public ushort AirGroundTimer;
-		[Field]
-		public ushort JumpTimer;
-		[Field]
-		[Padding(1)]
-		public uint UnkSfxID_0d;
-		[Field]
-		[Padding(1)]
-		public byte CharacterState;
-		[Field]
-		public uint KeyFrameTime_2;
-		[Field]
-		public byte FactionMode;
-		[Field]
-		public byte FactionID;
-		[Field]
-		public uint CurrentHealth;
-		[Field]
-		[Padding(8)]
-		public uint KeyFrameTime_3;
-		[Field]
-		public uint MaxHealth;
-		[Field]
-		public uint KeyFrameTime_4;
-		[Field]
-		public byte EffectsFlag;
-		[Field]
-		public float JumpJetEnergy;
-		[Field]
-		public uint MaxJumpJetEnergy;
-		[Field]
-		public float JumpJetRecharge;
-		[Field]
-		public uint KeyFrameTime_5;
-
+		public ushort UnkUShort = 0x63;
 		[Field]
 		[LengthPrefixed(typeof(ushort))]
 		public IList<StatValue> ItemStatValues = new List<StatValue>();
-
+		
 		[Field]
 		[Padding(4)]
 		[LengthPrefixed(typeof(ushort))]
@@ -203,13 +78,10 @@ namespace MyGameServer.Packets.GSS.Character.BaseController {
 		public IList<StatValue> AttribCats2 = new List<StatValue>();
 
 		[Field]
-		[Padding(9)]
-		public ulong ArmyID;
-
+		public uint PVPRank;
 		[Field]
-		[Length(292)] // This matches Xsear's packet
-		//[Length(204)] // Minimum allowed if all zeros?
-		public IList<byte> Unk = new List<byte>();
+		public uint EliteRank;
+
 
 		public class Palette {
 			[Field]

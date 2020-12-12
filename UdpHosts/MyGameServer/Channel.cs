@@ -78,7 +78,7 @@ namespace MyGameServer {
 				LastActivity = DateTime.Now;
 			}
 
-			while( incomingPackets.TryDequeue( out GamePacket packet ) ) {
+			while( incomingPackets.TryDequeue( out var packet ) ) {
 				//Console.Write("> " + string.Concat(BitConverter.GetBytes(packet.Header.PacketHeader).ToArray().Select(b => b.ToString("X2")).ToArray()));
 				//Console.WriteLine(" "+string.Concat(packet.PacketData.ToArray().Select(b => b.ToString("X2")).ToArray()));
 				ushort seqNum = 0;
@@ -153,7 +153,7 @@ namespace MyGameServer {
 				var len = Math.Min(p.Length + hdrLen, MaxPacketSize);
 
 				var t = new Memory<byte>(new byte[len]);
-				p.Slice( 0, len - hdrLen ).CopyTo( t.Slice( hdrLen ) );
+				p.Slice( 0, len - hdrLen ).CopyTo( t[hdrLen..] );
 
 				if( IsSequenced ) {
 					//if( IsReliable )
@@ -172,7 +172,7 @@ namespace MyGameServer {
 
 				outgoingPackets.Enqueue( t );
 
-				p = p.Slice( len - hdrLen );
+				p = p[(len - hdrLen)..];
 			}
 
 			return true;
@@ -197,7 +197,7 @@ namespace MyGameServer {
 				throw new Exception();
 
 			var ret = new Memory<byte>(new byte[1 + p.Length]);
-			p.CopyTo( ret.Slice( 1 ) );
+			p.CopyTo( ret[1..] );
 
 			Utils.WritePrimitive( msgID ).CopyTo( ret );
 
@@ -220,7 +220,7 @@ namespace MyGameServer {
 
 			var msgID = gssMsgAttr.MsgID;
 			var ret = new Memory<byte>(new byte[9 + p.Length]);
-			p.CopyTo( ret.Slice( 9 ) );
+			p.CopyTo( ret[9..] );
 
 			Utils.WritePrimitive( entityID ).CopyTo( ret );
 
@@ -232,7 +232,7 @@ namespace MyGameServer {
 			else
 				throw new Exception();
 
-			Utils.WritePrimitive( msgID ).CopyTo( ret.Slice( 8 ) );
+			Utils.WritePrimitive( msgID ).CopyTo( ret[8..] );
 
 			p = ret;
 
