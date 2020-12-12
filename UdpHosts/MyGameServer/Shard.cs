@@ -17,11 +17,11 @@ using Shared.Common.Extensions;
 using Shared.Udp;
 
 namespace MyGameServer {
-    public class Shard : IShard {
+	public class Shard : IShard {
 		
-		public static IShard CurrentShard { get { return currShard; } }
-		[ThreadStatic]
-		private static IShard currShard;
+		//public static IShard CurrentShard { get { return currShard; } }
+		//[ThreadStatic]
+		//private static IShard currShard;
 
 		public const double NetworkTickRate = 1.0 / 20.0;
 		protected long startTime;
@@ -35,6 +35,13 @@ namespace MyGameServer {
 		public ulong CurrentTimeLong { get; protected set; }
 		public IDictionary<ushort, Tuple<IEntity, Enums.GSS.Controllers>> EntityRefMap { get; }
 		private ushort LastEntityRefId;
+		private ulong LastEntityId;
+		public ulong NextEntityID {
+			get {
+				LastEntityId += 0x100;
+				return LastEntityId;
+			}
+		}
 		protected Thread runThread;
 
 		public Shard( double gameTickRate, ulong instID, IPacketSender netServer ) {
@@ -49,6 +56,7 @@ namespace MyGameServer {
 			InstanceID = instID;
 			EntityRefMap = new ConcurrentDictionary<ushort, Tuple<IEntity, Enums.GSS.Controllers>>();
 			LastEntityRefId = 0;
+			LastEntityId = 0L;
 		}
 
 		public void Run( CancellationToken ct ) {
@@ -68,7 +76,10 @@ namespace MyGameServer {
 			ulong currTime;
 			double delta;
 
-			currShard = this;
+			IShard.CurrentShard = this;
+
+			var xsear = Test.Entities.Xsear.Get();
+			Entities.Add( xsear.EntityID, xsear );
 
 			sw.Start();
 
@@ -105,11 +116,18 @@ namespace MyGameServer {
 
 		public bool Tick( double deltaTime, ulong currTime, CancellationToken ct ) {
 			CurrentTimeLong = currTime;
-			foreach( var c in Clients.Values ) {
+			foreach( var c in Clients ) {
 				if( ct.IsCancellationRequested )
 					break;
 
-				c.Tick( deltaTime, currTime, ct );
+				c.Value.Tick( deltaTime, currTime, ct );
+			}
+
+			foreach( var e in Entities ) {
+				if( ct.IsCancellationRequested )
+					break;
+
+				e.Value.Tick( deltaTime, currTime, ct );
 			}
 
 			foreach( var sys in Systems ) {
@@ -154,6 +172,14 @@ namespace MyGameServer {
 
 			return unchecked(LastEntityRefId++);
 		}
+
+		public bool AddEntity( IEntity entity ) {
+			if( Entities.ContainsKey( entity.EntityID ) )
+				return false;
+
+			Entities.Add( entity.EntityID, entity );
+			return true;
+        }
 
 		public async Task<bool> SendAll<T>( ChannelType chan, T pkt, INetworkPlayer ignore = null ) where T : class {
 			var tasks = new List<Task<bool>>();

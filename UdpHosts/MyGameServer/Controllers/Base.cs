@@ -31,8 +31,8 @@ namespace MyGameServer.Controllers {
 			var method = ReflectionUtils.FindMethodsByAttribute<MessageIDAttribute>(this).Where(( mi ) => mi.GetAttribute<MessageIDAttribute>().MsgID == MsgID).FirstOrDefault();
 
 			if( method == null ) {
-				Log.Verbose("---> Unrecognized MsgID for GSS Packet; Controller = {0} Entity = 0x{1:X8} MsgID = {2}!", ControllerID, EntityID, MsgID);
-				Program.Logger.Warning(">  {0}", BitConverter.ToString(packet.PacketData.ToArray()).Replace("-", " "));
+				Log.Error("---> Unrecognized MsgID for GSS Packet; Controller = {0} Entity = 0x{1:X8} MsgID = {2}!", ControllerID, EntityID, MsgID);
+				Log.Warning(">  {0}", BitConverter.ToString(packet.PacketData.ToArray()).Replace("-", " "));
 				return;
 			}
 

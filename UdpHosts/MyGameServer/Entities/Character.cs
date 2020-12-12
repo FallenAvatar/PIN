@@ -26,7 +26,7 @@ namespace MyGameServer.Entities {
 		public bool Alive { get; set; }
 		public ushort? LastJumpTime { get; set; }
 
-		public Character( IShard owner, ulong eid ) : base(owner, eid) {
+		public Character( IShard owner ) : base(owner) {
 			Position = new System.Numerics.Vector3();
 			Rotation = System.Numerics.Quaternion.Identity;
 			Velocity = new System.Numerics.Vector3();

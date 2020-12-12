@@ -39,8 +39,9 @@ namespace MyGameServer {
 
 		public async Task Login( ulong charID ) {
 			CharacterID = charID;
-			CharacterEntity = new Entities.Character( AssignedShard, charID & 0xffffffffffffff00 );
+			CharacterEntity = new Entities.Character( AssignedShard );
 			CharacterEntity.Load( charID );
+			AssignedShard.AddEntity( CharacterEntity );
 			Status = IPlayer.PlayerStatus.LoggedIn;
 
 			// WelcomeToTheMatrix
@@ -48,6 +49,8 @@ namespace MyGameServer {
 				InstanceID = AssignedShard.InstanceID
 			};
 			_ = await NetChans[ChannelType.Matrix].SendClass( wel );
+
+			Program.Logger.Information( "{0} has logged in with Character ID {1:X16}", this.CharacterEntity.CharData.Name, this.CharacterID );
 
 			EnterZone( Test.DataUtils.GetZone( 448 ) );
 		}
@@ -191,7 +194,7 @@ namespace MyGameServer {
 
 			} else if( Status == IPlayer.PlayerStatus.Playing ) {
 				if( AssignedShard.CurrentTime - lastKeyFrame > 0.5 ) {
-					//NetChans[ChannelType.ReliableGss].SendGSSClass(Test.GSS.Character.BaseController.KeyFrame.Test(this, this), this.InstanceID, msgEnumType: typeof(Enums.GSS.Character.Events));
+					NetChans[ChannelType.ReliableGss].SendGSSClass(Test.GSS.Character.BaseController.KeyFrame.Test(this, AssignedShard), this.CharacterEntity.EntityID, msgEnumType: typeof(Enums.GSS.Character.Events));
 				}
 			}
 		}

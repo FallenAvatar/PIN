@@ -6,12 +6,19 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using MyGameServer.Data;
+using MyGameServer.Entities;
 
 using Shared.Udp;
 
 namespace MyGameServer {
 	public interface IShard : IInstance {
+		public static IShard CurrentShard { get { return currShard; } protected set { currShard = value; } }
+		[ThreadStatic]
+		private static IShard currShard;
+
 		IDictionary<uint, INetworkPlayer> Clients { get; }
+		IDictionary<ulong, IEntity> Entities { get; }
+		ulong NextEntityID { get; }
 		IPacketSender NetServer { get; }
 		IDictionary<Systems.SystemType, Systems.ISystem> Systems { get; }
 		int CurrentPlayers => Clients.Count;
@@ -27,6 +34,7 @@ namespace MyGameServer {
 		bool MigrateOut( INetworkPlayer player );
 		bool MigrateIn( INetworkPlayer player );
 		ushort AssignNewRefId( Entities.IEntity entity, Enums.GSS.Controllers controller);
+		bool AddEntity( IEntity entity );
 
 		Task<bool> SendAll<T>( ChannelType chan, T pkt, INetworkPlayer ignore = null ) where T : class;
 		Task<bool> SendGSSAll<T>( ChannelType chan, T pkt, ulong entityID, Enums.GSS.Controllers? controllerID = null, INetworkPlayer ignore = null ) where T : class;

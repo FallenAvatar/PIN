@@ -52,7 +52,7 @@ namespace MyGameServer {
 			var conn = Controllers.Factory.Get(ControllerID);
 
 			if( conn == null ) {
-				Program.Logger.Verbose( "---> Unrecognized ControllerID for GSS Packet; Controller = {0} Entity = 0x{1:X16} MsgID = {2}!", ControllerID, EntityID, MsgID );
+				Program.Logger.Error( "---> Unrecognized ControllerID for GSS Packet; Controller = {0} Entity = 0x{1:X16} MsgID = {2}!", ControllerID, EntityID, MsgID );
 				Program.Logger.Warning( ">  {0}", BitConverter.ToString( packet.PacketData.ToArray() ).Replace( "-", " " ) );
 				return;
 			}

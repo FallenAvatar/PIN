@@ -85,9 +85,7 @@ namespace MyGameServer.Packets.GSS.Character.BaseController {
 		[Padding(9)]
 		public uint PrimaryWeaponID;
 		[Field]
-		[Length(3)]
-		public IList<byte> UnkBytes6 = new List<byte>();
-		[Field]
+		[Padding(3)]
 		[LengthPrefixed(typeof(byte))]
 		public IList<WeaponModule> PrimaryWeaponModules = new List<WeaponModule>();
 		[Field]
