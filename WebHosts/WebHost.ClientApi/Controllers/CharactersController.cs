@@ -4,13 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using WebHost.ClientApi.Models;
-using Shared.Common;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Common.Extensions;
 
 namespace WebHost.ClientApi.Controllers {
-	[ApiController]
+    [ApiController]
 	public class CharactersController : ControllerBase {
 		[Route("api/v2/characters/list")]
 		[HttpGet]

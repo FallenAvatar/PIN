@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 using Shared.Udp;
+using Shared.Udp.Attributes;
 
 namespace MyGameServer.Packets.GSS.Character.LocalEffectsController {
 	[GSSMessage( Enums.GSS.Controllers.Character_LocalEffectsController, (byte)Enums.GSS.Character.Events.ControllerKeyFrame )]

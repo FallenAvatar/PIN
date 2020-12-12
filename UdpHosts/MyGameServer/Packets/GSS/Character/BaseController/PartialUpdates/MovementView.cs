@@ -5,6 +5,7 @@ using System.Text;
 using MyGameServer.Packets.Common;
 
 using Shared.Udp;
+using Shared.Udp.Attributes;
 
 namespace MyGameServer.Packets.GSS.Character.BaseController.PartialUpdates {
     [PartialUpdate.PartialShadowField(0x0c)]

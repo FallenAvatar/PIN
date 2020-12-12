@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
+using Shared.Common.Extensions;
+
 using MyGameServer.Extensions;
 
 namespace MyGameServer {
 	public static class ReflectionUtils {
-		public static IEnumerable<Type> FindTypesByAttribute<T>() where T : Attribute {
+		public static IEnumerable<System.Type> FindTypesByAttribute<T>() where T : Attribute {
 			return (from t in Assembly.GetExecutingAssembly().GetTypes()
 					where t.GetAttribute<T>() != null
 					select t);

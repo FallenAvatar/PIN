@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 
 using Shared.Udp;
+using Shared.Udp.Attributes;
 
 namespace MyGameServer.Packets.GSS.Character.EquipmentView {
-    [GSSMessage( Enums.GSS.Controllers.Character_EquipmentView, (byte)Enums.GSS.Character.Events.ControllerKeyFrame )]
+    [GSSMessage( Enums.GSS.Controllers.Character_EquipmentView, (byte)Enums.GSS.Character.Events.ViewKeyFrame )]
     public class KeyFrame {
 		[Field]
 		[Padding(1)]

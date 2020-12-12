@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-using Shared.Udp;
+using Shared.Udp.Attributes;
 
 namespace MyGameServer.Packets.Common {
 	public class Quaternion {

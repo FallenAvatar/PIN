@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 
 using Shared.Udp;
+using Shared.Udp.Attributes;
 
 namespace MyGameServer.Packets.GSS {
     [GSSMessage( (byte)Enums.GSS.Character.Events.Update )]

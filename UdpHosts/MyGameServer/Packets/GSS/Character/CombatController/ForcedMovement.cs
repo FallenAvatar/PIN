@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 using Shared.Udp;
+using Shared.Udp.Attributes;
 
 namespace MyGameServer.Packets.GSS.Character.CombatController {
     [GSSMessage( Enums.GSS.Controllers.Character_CombatController, (byte)Enums.GSS.Character.Events.ForcedMovement )]

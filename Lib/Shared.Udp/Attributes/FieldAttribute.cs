@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Shared.Udp {
+namespace Shared.Udp.Attributes {
     [AttributeUsage( AttributeTargets.Field, Inherited = true, AllowMultiple = false )]
     public sealed class FieldAttribute : Attribute {
         private readonly int order_;

@@ -184,7 +184,7 @@ namespace MyGameServer {
 		}
 
 		public void Tick( double deltaTime, ulong currTime, CancellationToken ct ) {
-			// TODO: Implement FSM here to move player thru log in process to connecting to a shard to playing
+			// TODO: Implement FSM here to move player thru log in process from connecting to a shard to playing
 			if( Status == IPlayer.PlayerStatus.Connected ) {
 				Status = IPlayer.PlayerStatus.LoggingIn;
 			} else if( Status == IPlayer.PlayerStatus.Loading ) {

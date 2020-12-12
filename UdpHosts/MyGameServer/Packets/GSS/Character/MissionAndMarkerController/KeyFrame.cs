@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 using Shared.Udp;
+using Shared.Udp.Attributes;
 
 namespace MyGameServer.Packets.GSS.Character.MissionAndMarkerController {
 	[GSSMessage( Enums.GSS.Controllers.Character_MissionAndMarkerController, (byte)Enums.GSS.Character.Events.ControllerKeyFrame )]

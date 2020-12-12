@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using Shared.Common.Extensions;
+
 using MyGameServer.Extensions;
 
 namespace MyGameServer.Controllers {
@@ -39,7 +41,7 @@ namespace MyGameServer.Controllers {
 			return null;
 		}
 
-		public static Type ForControllerID( Enums.GSS.Controllers cID ) {
+		public static System.Type ForControllerID( Enums.GSS.Controllers cID ) {
 			var ts = ReflectionUtils.FindTypesByAttribute<ControllerIDAttribute>();
 
 			return ts.Where(( t ) => t.GetAttribute<ControllerIDAttribute>().ControllerID == cID).FirstOrDefault();

@@ -5,6 +5,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
+using Shared.Common.Extensions;
+
 using MyGameServer.Extensions;
 using MyGameServer.Packets;
 

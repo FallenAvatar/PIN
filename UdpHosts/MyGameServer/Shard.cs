@@ -13,11 +13,11 @@ using System.Threading.Tasks;
 using MyGameServer.Data;
 using MyGameServer.Entities;
 
-using Shared.Common;
+using Shared.Common.Extensions;
 using Shared.Udp;
 
 namespace MyGameServer {
-	public class Shard : IShard {
+    public class Shard : IShard {
 		
 		public static IShard CurrentShard { get { return currShard; } }
 		[ThreadStatic]
@@ -43,6 +43,7 @@ namespace MyGameServer {
 			Systems = new Dictionary<Systems.SystemType, Systems.ISystem>();
 			Systems.Add( MyGameServer.Systems.SystemType.AI, new Systems.AIEngine() );
 			Systems.Add( MyGameServer.Systems.SystemType.Physics, new Systems.PhysicsEngine( gameTickRate ) );
+			Systems.Add( MyGameServer.Systems.SystemType.Aptitude, new Systems.Aptitude() );
 
 			NetServer = netServer;
 			InstanceID = instID;
@@ -105,11 +106,18 @@ namespace MyGameServer {
 		public bool Tick( double deltaTime, ulong currTime, CancellationToken ct ) {
 			CurrentTimeLong = currTime;
 			foreach( var c in Clients.Values ) {
+				if( ct.IsCancellationRequested )
+					break;
+
 				c.Tick( deltaTime, currTime, ct );
 			}
 
-			foreach( var sys in Systems )
+			foreach( var sys in Systems ) {
+				if( ct.IsCancellationRequested )
+					break;
+
 				sys.Value.Tick( deltaTime, currTime, ct );
+			}
 
 			return true;
 		}
@@ -118,6 +126,9 @@ namespace MyGameServer {
 		public void NetworkTick( double deltaTime, ulong currTime, CancellationToken ct ) {
 			// Handle timeout, reliable retransmission, normal rx/tx
 			foreach( var c in Clients.Values ) {
+				if( ct.IsCancellationRequested )
+					break;
+
 				c.NetworkTick( deltaTime, currTime, ct );
 			}
 		}
@@ -136,8 +147,8 @@ namespace MyGameServer {
 		}
 
 		public ushort AssignNewRefId( IEntity entity, Enums.GSS.Controllers controller ) {
-			while( EntityRefMap.ContainsKey( unchecked(++LastEntityRefId) ) || LastEntityRefId == 0 || LastEntityRefId == 0xffff )
-				;
+			while( LastEntityRefId == 0 || LastEntityRefId == 0xffff || EntityRefMap.ContainsKey( LastEntityRefId ) )
+				LastEntityRefId = unchecked((ushort)(LastEntityRefId + 1));
 
 			EntityRefMap.Add( LastEntityRefId, new Tuple<IEntity, Enums.GSS.Controllers>( entity, controller ) );
 

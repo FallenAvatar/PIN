@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 using Shared.Udp;
+using Shared.Udp.Attributes;
 
 namespace MyGameServer.Packets.GSS.Character.BaseController {
 	[GSSMessage( Enums.GSS.Controllers.Character_BaseController, (byte)Enums.GSS.Character.Events.ControllerKeyFrame )]

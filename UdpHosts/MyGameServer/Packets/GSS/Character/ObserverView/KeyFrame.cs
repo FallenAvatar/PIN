@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 
 using Shared.Udp;
+using Shared.Udp.Attributes;
 
 namespace MyGameServer.Packets.GSS.Character.ObserverView {
-	[GSSMessage( Enums.GSS.Controllers.Character_ObserverView, (byte)Enums.GSS.Character.Events.ControllerKeyFrame )]
+	[GSSMessage( Enums.GSS.Controllers.Character_ObserverView, (byte)Enums.GSS.Character.Events.ViewKeyFrame )]
 	public class KeyFrame {
 		[Field]
 		public uint UnkUInt1;
