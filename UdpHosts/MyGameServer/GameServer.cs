@@ -45,11 +45,11 @@ namespace MyGameServer {
 			Controllers.Factory.Init();
 
 			// Load sdb
-			var sdb_path = @"C:\Program Files\Steam\steamapps\common\Firefall\system\db\clientdb.sd2";
-			Logger.Information( "Loading Static DB file \"{0}\".", sdb_path );
-			SDB = new FauFau.Formats.StaticDB();
-			SDB.Read( sdb_path );
-			Logger.Information( "Static DB file loaded." );
+			//var sdb_path = @"C:\Program Files\Steam\steamapps\common\Firefall\system\db\clientdb.sd2";
+			//Logger.Information( "Loading Static DB file \"{0}\".", sdb_path );
+			//SDB = new FauFau.Formats.StaticDB();
+			//SDB.Read( sdb_path );
+			//Logger.Information( "Static DB file loaded." );
 
 			_ = NewShard( ct );
 		}

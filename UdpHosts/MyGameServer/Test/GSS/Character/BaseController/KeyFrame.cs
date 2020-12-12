@@ -101,7 +101,7 @@ namespace MyGameServer.Test.GSS.Character.BaseController {
 			ret.AirGroundTimer = 0;
 			ret.JumpTimer = 0;
 
-			ret.UnkSfxID_0d = 0x370A2C01;
+			ret.UnkSfxID_0d = 0x012C0A37;// 0x370A2C01;
 
 			ret.CharacterState = 0;
 

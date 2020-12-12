@@ -18,7 +18,9 @@ namespace MyGameServer.Controllers.Character {
 			_ = await shard.SendGSSTo( player, ChannelType.ReliableGss, new Packets.GSS.Character.CombatController.KeyFrame( shard ) { PlayerID = player.EntityID }, player.EntityID );
 			_ = await shard.SendGSSTo( player, ChannelType.ReliableGss, new Packets.GSS.Character.LocalEffectsController.KeyFrame( shard ) { PlayerID = player.EntityID }, player.EntityID );
 			_ = await shard.SendGSSTo( player, ChannelType.ReliableGss, new Packets.GSS.Character.MissionAndMarkerController.KeyFrame( shard ) { PlayerID = player.EntityID }, player.EntityID );
+			
 			_ = await shard.SendGSSTo( player, ChannelType.ReliableGss, new CharacterLoaded(), player.EntityID );
+			//_ = await shard.SendGSSTo( player, ChannelType.ReliableGss, new ResourceLocationInfosResponse(), player.EntityID );
 		}
 
 		[MessageID( (byte)Enums.GSS.Character.Commands.FetchQueueInfo )]
