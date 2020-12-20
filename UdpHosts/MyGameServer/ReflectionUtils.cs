@@ -5,8 +5,6 @@ using System.Reflection;
 
 using Shared.Common.Extensions;
 
-using MyGameServer.Extensions;
-
 namespace MyGameServer {
 	public static class ReflectionUtils {
 		public static IEnumerable<System.Type> FindTypesByAttribute<T>() where T : Attribute {

@@ -195,7 +195,8 @@ namespace MyGameServer {
 
 			} else if( Status == IPlayer.PlayerStatus.Playing ) {
 				if( AssignedShard.CurrentTime - lastKeyFrame > 0.5 ) {
-					//NetChans[ChannelType.ReliableGss].SendGSSClass(Test.GSS.Character.BaseController.KeyFrame.Test(this, AssignedShard), this.CharacterEntity.EntityID, msgEnumType: typeof(Enums.GSS.Character.Events));
+					//NetChans[ChannelType.ReliableGss].SendGSSClass(Controllers.Character.ObserverView.BuildKeyframe( this.CharacterEntity ), this.CharacterEntity.EntityID, msgEnumType: typeof(Enums.GSS.Character.Events));
+					//lastKeyFrame = AssignedShard.CurrentTime;
 				}
 			}
 		}

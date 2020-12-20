@@ -4,7 +4,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
-using MyGameServer.Extensions;
+using Shared.Common.Extensions;
 
 using Packet = MyGameServer.Packets.GSS.Character.BaseController;
 

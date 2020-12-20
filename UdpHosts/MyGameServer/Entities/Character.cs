@@ -43,6 +43,7 @@ namespace MyGameServer.Entities {
 
 		public void Load(ulong charID) {
 			CharData = Data.Character.Load(charID);
+			this.EntityID = charID & ~(0xFFUL);
 		}
 	}
 }

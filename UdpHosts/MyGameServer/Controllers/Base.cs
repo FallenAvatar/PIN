@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 using Shared.Common.Extensions;
 
-using MyGameServer.Extensions;
 using MyGameServer.Packets;
 
 using Serilog;

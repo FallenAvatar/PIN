@@ -101,7 +101,7 @@ namespace MyGameServer {
 						data = System.Runtime.InteropServices.MemoryMarshal.Cast<ulong, byte>( uSpan ).ToArray();
 					}
 
-					for( int i = x * 8; i < packet.PacketData.Length; i++ )
+					for( int i = x * 8; i < data.Length; i++ )
 						data[i] ^= xorByte[packet.Header.ResendCount];
 
 					//for( int i = 0; i < data.Length; i++ )

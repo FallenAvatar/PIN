@@ -13,6 +13,7 @@ namespace MyGameServer.Data {
 			Unknown = 1,
 			DarkOne = 2
 		}
+
 		public static Character Load(ulong charID) {
 			// TODO: Pull from database or w/e
 			return new Character() { CharacterGUID = charID };
@@ -25,6 +26,11 @@ namespace MyGameServer.Data {
 		public CharacterRace Race { get; set; }
 		public uint CharInfoID { get; set; }
 		public uint NameLocalizationID { get; set; }
+		public bool IsNPC { get; set; }
+		public bool IsDev { get; set; }
+		public bool IsMentor { get; set; }
+		public bool IsRanger { get; set; }
+		public bool IsPublisher { get; set; }
 		public byte Level { get; set; }
 		public byte EffectiveLevel { get; set; }
 		public float JumpJetEnergy { get; set; }

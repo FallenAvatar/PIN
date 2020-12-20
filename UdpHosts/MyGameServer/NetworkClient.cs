@@ -82,9 +82,9 @@ namespace MyGameServer {
 			case Enums.MatrixPacketType.KeyframeRequest:
 				// TODO; See onKeyframeRequest in server_gamesocket.js
 				var kfrpkt = packet.Read<Packets.Matrix.KeyFrameRequest>();
-
+				Program.Logger.Warning( ">  KeyFrame Request: Entities {0} | Refs {1}", kfrpkt.EntityRequests?.Count, kfrpkt.RefRequests?.Count );
 				int i=0;
-
+				NetChans[ChannelType.ReliableGss].SendGSSClass( Test.GSS.Character.BaseController.KeyFrame.Test( this.Player, AssignedShard ), this.Player.CharacterEntity.EntityID, msgEnumType: typeof( Enums.GSS.Character.Events ) );
 				break;
 			case Enums.MatrixPacketType.ClientStatus:
 				_ = NetChans[ChannelType.Matrix].SendClass(new Packets.Matrix.MatrixStatus() );

@@ -6,8 +6,6 @@ using System.Text;
 
 using Shared.Common.Extensions;
 
-using MyGameServer.Extensions;
-
 namespace MyGameServer.Controllers {
 	public static class Factory {
 		public static void Init() {
