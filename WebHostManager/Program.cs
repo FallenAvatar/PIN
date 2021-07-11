@@ -13,46 +13,50 @@ using Serilog;
 namespace WebHostManager {
 	internal static class Program {
 		private static IConfiguration Configuration { get; } = new ConfigurationBuilder()
-		                                                       .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(),"config"))
-		                                                       .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-		                                                       .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
-		                                                       .AddEnvironmentVariables()
-		                                                       .Build();
+															   .SetBasePath( Path.Combine( Directory.GetCurrentDirectory(), "config" ) )
+															   .AddJsonFile( "appsettings.json", optional: false, reloadOnChange: true )
+															   .AddJsonFile( $"appsettings.{Environment.GetEnvironmentVariable( "ASPNETCORE_ENVIRONMENT" ) ?? "Production"}.json", optional: true )
+															   .AddEnvironmentVariables()
+															   .Build();
 
 		private static readonly IEnumerable<Type> HostTypes = new[] {
-			                                                            typeof(WebHost.Chat.WebServer),
-			                                                            typeof(WebHost.ClientApi.WebServer),
-			                                                            typeof(WebHost.OperatorApi.WebServer),
-			                                                            typeof(WebHost.InGameApi.WebServer),
-			                                                            typeof(WebHost.Store.WebServer),
-			                                                            typeof(WebHost.Replay.WebServer),
-			                                                            typeof(WebHost.Market.WebServer),
-			                                                            typeof(WebHost.WebAsset.WebServer),
-		                                                            };
+																		typeof(WebHost.Chat.WebServer),
+																		typeof(WebHost.ClientApi.WebServer),
+																		typeof(WebHost.OperatorApi.WebServer),
+																		typeof(WebHost.InGameApi.WebServer),
+																		typeof(WebHost.Store.WebServer),
+																		typeof(WebHost.Replay.WebServer),
+																		typeof(WebHost.Market.WebServer),
+																		typeof(WebHost.WebAsset.WebServer),
+																	};
 
-		private static void Main( string[] args ) {
+		private static async Task Main( string[] args ) {
 			Log.Logger = new LoggerConfiguration()
-			   .ReadFrom.Configuration(Configuration)
+			   .ReadFrom.Configuration( Configuration )
 			   .CreateLogger();
 
 			try {
-				Log.Information("Starting Web Hosts");
+				Log.Information( "Starting Web Hosts" );
 				var ct = new CancellationToken();
 
-				var hostsTasks = StartHosts(ct);
+				var hostsTasks = StartHosts( ct );
 
-				Log.Information("All Web Hosts started, waiting for all to stop or break/kill signal. (Ctrl-c on Windows)");
+				Log.Information( "All Web Hosts started, waiting for all to stop or break/kill signal. (Ctrl-c on Windows)" );
 
-				Task.WaitAll(hostsTasks.ToArray(), ct);
+				Task.WaitAll( hostsTasks.ToArray(), ct );
 			} catch( Exception ex ) {
-				Log.Fatal(ex, "Host terminated unexpectedly");
+				Log.Fatal( ex, "Host terminated unexpectedly" );
 			} finally {
 				Log.CloseAndFlush();
 			}
 		}
 
 		private static IEnumerable<Task> StartHosts( CancellationToken ct ) {
-			return HostTypes.Select(t => Shared.Web.BaseWebServer.Build(t, Configuration).RunAsync(ct)).ToList();
+			return HostTypes.Select( t => BuildHost( t ).RunAsync( ct ) ).ToList();
+		}
+
+		private static IWebHost BuildHost( Type hostType ) {
+			return Shared.Web.BaseWebServer.Build( hostType, Configuration );
 		}
 	}
 }

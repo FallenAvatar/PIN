@@ -13,17 +13,17 @@ using System.Threading;
 using Shared.Udp.Attributes;
 
 namespace Shared.Udp {
-    public static class Utils {
+	public static class Utils {
 		public static Thread RunThread( ThreadStart action ) {
-			var t = new Thread(action);
+			var t = new Thread( action );
 			t.Start();
 
 			return t;
 		}
 
 		public static Thread RunThread( Action<CancellationToken> action, CancellationToken ct ) {
-			var t = new Thread((o) => action((CancellationToken)o));
-			t.Start(ct);
+			var t = new Thread( ( o ) => action( (CancellationToken)o ) );
+			t.Start( ct );
 
 			return t;
 		}
@@ -74,10 +74,10 @@ namespace Shared.Udp {
 			if( attrs == null )
 				attrs = t.GetCustomAttributes();
 
-			var preLen = attrs.Where(a => a is LengthPrefixedAttribute).FirstOrDefault() as LengthPrefixedAttribute;
-			var len = attrs.Where(a => a is LengthAttribute).FirstOrDefault() as LengthAttribute;
-			var pad = attrs.Where(a => a is PaddingAttribute).FirstOrDefault() as PaddingAttribute;
-			var exists = attrs.Where(a => a is ExistsPrefixAttribute).FirstOrDefault() as ExistsPrefixAttribute;
+			var preLen = attrs.Where( a => a is LengthPrefixedAttribute ).FirstOrDefault() as LengthPrefixedAttribute;
+			var len = attrs.Where( a => a is LengthAttribute ).FirstOrDefault() as LengthAttribute;
+			var pad = attrs.Where( a => a is PaddingAttribute ).FirstOrDefault() as PaddingAttribute;
+			var exists = attrs.Where( a => a is ExistsPrefixAttribute ).FirstOrDefault() as ExistsPrefixAttribute;
 
 			object ret = null;
 
@@ -92,7 +92,7 @@ namespace Shared.Udp {
 			}
 
 			if( typeof( IEnumerable ).IsAssignableFrom( t ) && t.GenericTypeArguments != null && t.GenericTypeArguments.Length > 0 ) {
-				int l=0;
+				int l = 0;
 				if( preLen != null ) {
 					l = (int)Convert.ChangeType( Read( ref data, preLen.LengthType ), typeof( int ) );
 					data = data.Slice( Marshal.SizeOf( preLen.LengthType ) );
@@ -101,7 +101,7 @@ namespace Shared.Udp {
 				else
 					throw new Exception();
 
-				var tempRet = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(t.GenericTypeArguments));
+				var tempRet = (IList)Activator.CreateInstance( typeof( List<> ).MakeGenericType( t.GenericTypeArguments ) );
 				for( var i = 0; i < l; i++ )
 					_ = tempRet.Add( Read( ref data, t.GenericTypeArguments[0] ) );
 
@@ -122,7 +122,7 @@ namespace Shared.Udp {
 				ret = Enum.ToObject( t, Read( ref data, Enum.GetUnderlyingType( t ) ) );
 			} else if( t.IsValueType ) {
 
-				int size = Marshal.SizeOf(t);
+				int size = Marshal.SizeOf( t );
 				var mh = data.Slice( 0, size ).Pin();
 
 				ret = Marshal.PtrToStructure( new IntPtr( mh.Pointer ), t );
@@ -191,13 +191,13 @@ namespace Shared.Udp {
 
 		public static object ReadClass( ref ReadOnlyMemory<byte> data, Type t ) {
 			var props = from prop in t.GetFields()
-						where Attribute.IsDefined(prop, typeof(FieldAttribute))
+						where Attribute.IsDefined( prop, typeof( FieldAttribute ) )
 						orderby ((FieldAttribute)prop
-							.GetCustomAttributes(typeof(FieldAttribute), false)
+							.GetCustomAttributes( typeof( FieldAttribute ), false )
 							.Single()).Order
 						select prop;
 
-			var ret = Activator.CreateInstance(t);
+			var ret = Activator.CreateInstance( t );
 			foreach( var p in props ) {
 				var attrs = p.GetCustomAttributes();
 				var v = Read( ref data, p.FieldType, attrs );
@@ -209,10 +209,10 @@ namespace Shared.Udp {
 		}
 
 		public unsafe static Memory<byte> Write( object o, Type t, IEnumerable<Attribute> attrs = null ) {
-			var preLen = attrs?.Where(a => a is LengthPrefixedAttribute).FirstOrDefault() as LengthPrefixedAttribute;
-			var len = attrs?.Where(a => a is LengthAttribute).FirstOrDefault() as LengthAttribute;
-			var pad = attrs?.Where(a => a is PaddingAttribute).FirstOrDefault() as PaddingAttribute;
-			var exists = attrs?.Where(a => a is ExistsPrefixAttribute).FirstOrDefault() as ExistsPrefixAttribute;
+			var preLen = attrs?.Where( a => a is LengthPrefixedAttribute ).FirstOrDefault() as LengthPrefixedAttribute;
+			var len = attrs?.Where( a => a is LengthAttribute ).FirstOrDefault() as LengthAttribute;
+			var pad = attrs?.Where( a => a is PaddingAttribute ).FirstOrDefault() as PaddingAttribute;
+			var exists = attrs?.Where( a => a is ExistsPrefixAttribute ).FirstOrDefault() as ExistsPrefixAttribute;
 			var ret = new List<Memory<byte>>();
 
 			if( pad != null )
@@ -255,7 +255,7 @@ namespace Shared.Udp {
 				} else if( t.IsValueType && t.BaseType == typeof( Enum ) ) {
 					ret.Add( WritePrimitive( Convert.ChangeType( o, Enum.GetUnderlyingType( t ) ), Enum.GetUnderlyingType( t ) ) );
 				} else if( t.IsValueType ) {
-					int size = Marshal.SizeOf(t);
+					int size = Marshal.SizeOf( t );
 					Memory<byte> mem = new byte[size];
 					var mh = mem.Pin();
 
@@ -284,7 +284,7 @@ namespace Shared.Udp {
 
 			foreach( var item in ienum ) {
 
-				var mem = Write(item, t);
+				var mem = Write( item, t );
 				totalSize += mem.Length;
 				mems.Add( mem );
 				idx++;
@@ -292,7 +292,7 @@ namespace Shared.Udp {
 			}
 
 			if( len != null && idx < len.Length ) {
-				var l = (len.Length - idx) * Marshal.SizeOf(t);
+				var l = (len.Length - idx) * Marshal.SizeOf( t );
 				totalSize += l;
 				mems.Add( new byte[l].AsMemory() );
 			}
@@ -364,8 +364,8 @@ namespace Shared.Udp {
 				MemoryMarshal.Write( mem.Span, ref pkt );
 		}
 
-		public static T SimpleFixEndianess<T>(T val) where T : struct {
-			var s = MemoryMarshal.Cast<T,byte>(new T[] { val } );
+		public static T SimpleFixEndianess<T>( T val ) where T : struct {
+			var s = MemoryMarshal.Cast<T, byte>( new T[] { val } );
 			s.Reverse();
 			return MemoryMarshal.Cast<byte, T>( s ).ToArray().FirstOrDefault();
 		}
@@ -382,9 +382,9 @@ namespace Shared.Udp {
 
 		public static Memory<byte> WriteClass( object pkt, Type t ) {
 			var props = from prop in pkt.GetType().GetFields()
-						where Attribute.IsDefined(prop, typeof(FieldAttribute))
+						where Attribute.IsDefined( prop, typeof( FieldAttribute ) )
 						orderby ((FieldAttribute)prop
-							.GetCustomAttributes(typeof(FieldAttribute), false)
+							.GetCustomAttributes( typeof( FieldAttribute ), false )
 							.Single()).Order
 						select prop;
 
@@ -413,7 +413,7 @@ namespace Shared.Udp {
 		}
 
 		public static Memory<byte> Combine( IList<Memory<byte>> mems, int totalSize ) {
-			var ret = new Memory<byte>(new byte[totalSize]);
+			var ret = new Memory<byte>( new byte[totalSize] );
 			var idx = 0;
 			foreach( var m in mems ) {
 				m.CopyTo( ret.Slice( idx ) );

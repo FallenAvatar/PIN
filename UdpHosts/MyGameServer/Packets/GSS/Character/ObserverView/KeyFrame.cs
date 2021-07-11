@@ -1,4 +1,4 @@
-﻿using System;
+﻿//using System;
 using System.Collections.Generic;
 
 using Shared.Udp;
@@ -38,7 +38,7 @@ namespace MyGameServer.Packets.GSS.Character.ObserverView {
 		[Field]
 		public uint NameLocaliztionID;
 		[Field]
-		[LengthPrefixed(typeof(byte))]
+		[LengthPrefixed( typeof( byte ) )]
 		public IList<uint> HeadAccessories = new List<uint>();
 		[Field]
 		public uint VehicleLoadout;
@@ -68,7 +68,7 @@ namespace MyGameServer.Packets.GSS.Character.ObserverView {
 		[Field]
 		public byte FactionID;
 		[Field]
-		[Length(20)]
+		[Length( 20 )]
 		public IList<byte> Unk1 = new List<byte>();
 		[Field]
 		public byte HealthPercent;
@@ -77,10 +77,10 @@ namespace MyGameServer.Packets.GSS.Character.ObserverView {
 		[Field]
 		public uint KeyFrameTime_4;
 		[Field]
-		[Padding(21)]
+		[Padding( 21 )]
 		public ulong ArmyID;
 		[Field]
-		[Length(37)]
+		[Length( 37 )]
 		public IList<byte> Unk2 = new List<byte>();
 
 		public class Palette {
@@ -94,7 +94,7 @@ namespace MyGameServer.Packets.GSS.Character.ObserverView {
 			[Field]
 			public uint ID;
 			[Field]
-			[Length(4)]
+			[Length( 4 )]
 			public IList<Half> Transform = new List<Half>();
 			[Field]
 			public byte Usage;
@@ -102,41 +102,41 @@ namespace MyGameServer.Packets.GSS.Character.ObserverView {
 
 		public class Visuals {
 			[Field]
-			[LengthPrefixed(typeof(byte))]
+			[LengthPrefixed( typeof( byte ) )]
 			public IList<Decal> Decals = new List<Decal>();
 
 			[Field]
-			[LengthPrefixed(typeof(byte))]
+			[LengthPrefixed( typeof( byte ) )]
 			public IList<DecalGradient> DecalGradients = new List<DecalGradient>();
 
 			[Field]
-			[LengthPrefixed(typeof(byte))]
+			[LengthPrefixed( typeof( byte ) )]
 			public IList<uint> Colors = new List<uint>();
 
 			[Field]
-			[LengthPrefixed(typeof(byte))]
+			[LengthPrefixed( typeof( byte ) )]
 			public IList<Palette> Palettes = new List<Palette>();
 
 			[Field]
-			[LengthPrefixed(typeof(byte))]
+			[LengthPrefixed( typeof( byte ) )]
 			public IList<Pattern> Patterns = new List<Pattern>();
 
 			[Field]
-			[LengthPrefixed(typeof(byte))]
+			[LengthPrefixed( typeof( byte ) )]
 			public IList<uint> OrnamentGroups = new List<uint>();
 
 			// Below are likely Morph Weights, Overlays and Pattern Gradients?
 
 			[Field]
-			[LengthPrefixed(typeof(byte))]
+			[LengthPrefixed( typeof( byte ) )]
 			public IList<uint> ItemsUnk1 = new List<uint>();
 
 			[Field]
-			[LengthPrefixed(typeof(byte))]
+			[LengthPrefixed( typeof( byte ) )]
 			public IList<uint> ItemsUnk2 = new List<uint>();
 
 			[Field]
-			[LengthPrefixed(typeof(byte))]
+			[LengthPrefixed( typeof( byte ) )]
 			public IList<uint> ItemsUnk3 = new List<uint>();
 		}
 
@@ -146,7 +146,7 @@ namespace MyGameServer.Packets.GSS.Character.ObserverView {
 			[Field]
 			public uint Color;
 			[Field]
-			[Length(12)]
+			[Length( 12 )]
 			public IList<Half> Transform = new List<Half>();
 			[Field]
 			public byte Usage;

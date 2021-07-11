@@ -12,6 +12,8 @@ using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
 using System.Net;
 using System.Linq;
+using Microsoft.AspNetCore.HostFiltering;
+using Newtonsoft.Json.Serialization;
 
 namespace Shared.Web {
 	public abstract class BaseWebServer {
@@ -21,10 +23,18 @@ namespace Shared.Web {
 					throw new ArgumentNullException( nameof( serverType.FullName ) );
 
 				var ffConfig = configuration.GetSection( "Firefall" ).Get<Config.Firefall>();
+				var hostConfig = ffConfig.WebHosts.Single( kvp => kvp.Key == serverType.FullName.Replace( ".WebServer", "" ) ).Value;
+
+				var h = ffConfig.MainHost;
+
+				if( hostConfig.Subdomain != null )
+					h = hostConfig.Subdomain + "." + h;
 
 				Log.Information( $"Starting web host {serverType.FullName}" );
 				return WebHost.CreateDefaultBuilder()
 						.UseConfiguration( configuration )
+						.UseSetting( "HostName", h )
+						.UseSetting( "HostType", serverType.FullName.Replace( ".WebServer", "" ) )
 						.UseSerilog()
 						.UseKestrel( ( builder, serverOpts ) => {
 							serverOpts.ConfigureHttpsDefaults( opts => {
@@ -36,9 +46,9 @@ namespace Shared.Web {
 							var configuration = serverOpts.ApplicationServices.GetRequiredService<IConfiguration>();
 							var environment = serverOpts.ApplicationServices.GetRequiredService<IWebHostEnvironment>();
 
-							foreach( var config in ffConfig.WebHosts.Single(kvp => kvp.Key == serverType.FullName.Replace( ".WebServer", "" )).Value.Endpoints ) {
+							foreach( var kvp in hostConfig.Endpoints ) {
+								var config = kvp.Value;
 								var port = config.Port ?? (config.Scheme == "https" ? 443 : 80);
-								var h = ffConfig.MainHost;
 
 								var ipAddresses = new List<IPAddress>();
 								if( h == "localhost" ) {
@@ -53,7 +63,7 @@ namespace Shared.Web {
 									serverOpts.Listen( address, port,
 										listenOptions => {
 											if( config.Scheme == "https" ) {
-												var certificate = LoadCertificate(ffConfig.MainHost, config, environment);
+												var certificate = LoadCertificate( ffConfig.MainHost, config, environment );
 												_ = listenOptions.UseHttps( certificate );
 											}
 										} );
@@ -61,7 +71,7 @@ namespace Shared.Web {
 							}
 						} )
 					   .UseStartup( serverType )
-					   //.UseUrls( ffConfig.WebHosts[serverType.FullName.Replace( ".WebServer", "" )].Urls.Split( ";" ) )
+					   //.UseUrls( h )
 					   .Build();
 			} catch( Exception ex ) {
 				Log.Fatal( ex, "Host terminated unexpectedly" );
@@ -82,12 +92,16 @@ namespace Shared.Web {
 
 		public void ConfigureServices( IServiceCollection services ) {
 			_ = services.AddControllers()
-					.AddJsonOptions( options => {
-						options.JsonSerializerOptions.PropertyNamingPolicy =
-							new Common.SnakeCasePropertyNamingPolicy();
+					.AddNewtonsoftJson( opts => {
+						opts.SerializerSettings.ContractResolver = new DefaultContractResolver {
+							NamingStrategy = null
+						};
 					} );
 
-			_ = services.AddSingleton( Configuration.GetSection( "Firefall" ).Get<Config.Firefall>() );
+			var ffConfig = Configuration.GetSection( "Firefall" ).Get<Config.Firefall>();
+			_ = services.AddSingleton( ffConfig );
+			_ = services.AddSingleton<Data.IFirefallDatabase>( new Data.FirefallDatabase( ffConfig.Databases[ffConfig.WebHosts[Configuration.GetValue<string>( "HostType" )].ConnectionString] ) );
+			_ = services.Configure<HostFilteringOptions>( options => options.AllowedHosts = new[] { Configuration.GetValue<string>( "HostName" ) } );
 
 			ConfigureChildServices( services );
 		}
@@ -115,7 +129,7 @@ namespace Shared.Web {
 					var certificate = store.Certificates.Find(
 						X509FindType.FindBySubjectName,
 						hostName,
-						validOnly: !environment.IsDevelopment());
+						validOnly: !environment.IsDevelopment() );
 
 					if( certificate.Count == 0 )
 						throw new InvalidOperationException( $"Certificate not found for {hostName}." );
@@ -124,8 +138,8 @@ namespace Shared.Web {
 				}
 			}
 
-			if( config.FilePath != null && config.Password != null ) {
-				return new X509Certificate2( config.FilePath, config.Password );
+			if( config.FilePath != null && config.CertPassword != null ) {
+				return new X509Certificate2( config.FilePath, config.CertPassword );
 			}
 
 			throw new InvalidOperationException( "No valid certificate configuration found for the current endpoint." );

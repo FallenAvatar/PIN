@@ -1,17 +1,26 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Configurations>Debug;Release;Debug-WebOnly</Configurations>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<Configurations>Debug;Release;Debug-WebOnly</Configurations>
+		<LangVersion>9.0</LangVersion>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
-  </ItemGroup>
+	<ItemGroup>
+	  <Compile Remove="Capability\**" />
+	  <EmbeddedResource Remove="Capability\**" />
+	  <None Remove="Capability\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Lib\Shared.Common\Shared.Common.csproj" />
-    <ProjectReference Include="..\..\Lib\Shared.Web\Shared.Web.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
+		<PackageReference Include="System.Runtime" Version="4.3.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Lib\Shared.Common\Shared.Common.csproj" />
+		<ProjectReference Include="..\..\Lib\Shared.Web\Shared.Web.csproj" />
+	</ItemGroup>
 
 </Project>

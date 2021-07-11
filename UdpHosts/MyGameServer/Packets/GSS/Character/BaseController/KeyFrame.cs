@@ -1,4 +1,4 @@
-﻿using System;
+﻿//using System;
 using System.Collections.Generic;
 
 using Shared.Udp;
@@ -13,13 +13,13 @@ namespace MyGameServer.Packets.GSS.Character.BaseController {
 		public uint UnkInt1;
 		[Field]
 		public uint UnkInt2;
-		[Padding(1)]
+		[Padding( 1 )]
 		[Field]
 		public uint UsedInvSlots;
 		[Field]
 		public uint MaxInvSlots;
 		[Field]
-		[Padding(17)]
+		[Padding( 17 )]
 		public string DisplayName;
 		[Field]
 		public string UniqueName;
@@ -49,7 +49,7 @@ namespace MyGameServer.Packets.GSS.Character.BaseController {
 		public uint NameLocaliztionID;
 
 		[Field]
-		[LengthPrefixed(typeof(byte))]
+		[LengthPrefixed( typeof( byte ) )]
 		public IList<uint> HeadAccessories = new List<uint>();
 		[Field]
 		public uint VehicleLoadout;
@@ -62,48 +62,48 @@ namespace MyGameServer.Packets.GSS.Character.BaseController {
 		[Field]
 		public uint KeyFrameTime_0;
 		[Field]
-		[Padding(1)]
+		[Padding( 1 )]
 		public uint ChassisLoadout;
 		[Field]
-		[Length(3)]
+		[Length( 3 )]
 		public IList<byte> UnkBytes = new List<byte>();
 		[Field]
-		[LengthPrefixed(typeof(byte))]
+		[LengthPrefixed( typeof( byte ) )]
 		public IList<GearItem> Gear = new List<GearItem>();
 		[Field]
 		public Visuals ChassisVisuals = new Visuals();
 		[Field]
 		public uint BackpackLoadout;
 		[Field]
-		[Length(3)]
+		[Length( 3 )]
 		public IList<byte> UnkBytes2 = new List<byte>();
 		[Field]
-		[LengthPrefixed(typeof(byte))]
+		[LengthPrefixed( typeof( byte ) )]
 		public IList<Ability> Abilities = new List<Ability>();
 
 		[Field]
-		[Padding(9)]
+		[Padding( 9 )]
 		public uint PrimaryWeaponID;
 
 		[Field]
-		[Padding(3)]
-		[LengthPrefixed(typeof(byte))]
+		[Padding( 3 )]
+		[LengthPrefixed( typeof( byte ) )]
 		public IList<WeaponModule> PrimaryWeaponModules = new List<WeaponModule>();
 		[Field]
 		public Visuals PrimaryWeaponVisuals = new Visuals();
 		[Field]
-		[Padding(8)]
+		[Padding( 8 )]
 		public uint SecondaryWeaponID;
 		[Field]
-		[Length(3)]
+		[Length( 3 )]
 		public IList<byte> UnkBytes5 = new List<byte>();
 		[Field]
-		[LengthPrefixed(typeof(byte))]
-        public IList<WeaponModule> SecondaryWeaponModules = new List<WeaponModule>();
+		[LengthPrefixed( typeof( byte ) )]
+		public IList<WeaponModule> SecondaryWeaponModules = new List<WeaponModule>();
 		[Field]
 		public Visuals SecondaryWeaponVisuals = new Visuals();
 		[Field]
-		[Padding(13)]
+		[Padding( 13 )]
 		public uint LoadoutID;
 		[Field]
 		public uint UnkSfxID_0a;
@@ -141,17 +141,17 @@ namespace MyGameServer.Packets.GSS.Character.BaseController {
 		[Field]
 		public ushort MovementState;
 		[Field]
-		[Padding(2)]
+		[Padding( 2 )]
 		public ushort Jets;
 		[Field]
 		public ushort AirGroundTimer;
 		[Field]
 		public ushort JumpTimer;
 		[Field]
-		[Padding(1)]
+		[Padding( 1 )]
 		public uint UnkSfxID_0d;
 		[Field]
-		[Padding(1)]
+		[Padding( 1 )]
 		public byte CharacterState;
 		[Field]
 		public uint KeyFrameTime_2;
@@ -162,7 +162,7 @@ namespace MyGameServer.Packets.GSS.Character.BaseController {
 		[Field]
 		public uint CurrentHealth;
 		[Field]
-		[Padding(8)]
+		[Padding( 8 )]
 		public uint KeyFrameTime_3;
 		[Field]
 		public uint MaxHealth;
@@ -180,35 +180,35 @@ namespace MyGameServer.Packets.GSS.Character.BaseController {
 		public uint KeyFrameTime_5;
 
 		[Field]
-		[LengthPrefixed(typeof(ushort))]
+		[LengthPrefixed( typeof( ushort ) )]
 		public IList<StatValue> ItemStatValues = new List<StatValue>();
 
 		[Field]
-		[Padding(4)]
-		[LengthPrefixed(typeof(ushort))]
+		[Padding( 4 )]
+		[LengthPrefixed( typeof( ushort ) )]
 		public IList<StatValue> Weapon1StatValues = new List<StatValue>();
 
 		[Field]
-		[Padding(4)]
-		[LengthPrefixed(typeof(ushort))]
+		[Padding( 4 )]
+		[LengthPrefixed( typeof( ushort ) )]
 		public IList<StatValue> Weapon2StatValues = new List<StatValue>();
 
 		[Field]
-		[Padding(4)]
-		[LengthPrefixed(typeof(ushort))]
+		[Padding( 4 )]
+		[LengthPrefixed( typeof( ushort ) )]
 		public IList<StatValue> AttribCats1 = new List<StatValue>();
 
 		[Field]
-		[LengthPrefixed(typeof(ushort))]
+		[LengthPrefixed( typeof( ushort ) )]
 		public IList<StatValue> AttribCats2 = new List<StatValue>();
 
 		[Field]
-		[Padding(9)]
+		[Padding( 9 )]
 		public ulong ArmyID;
 
 		[Field]
-		[Length(292)] // This matches Xsear's packet
-		//[Length(204)] // Minimum allowed if all zeros?
+		[Length( 292 )] // This matches Xsear's packet
+						//[Length(204)] // Minimum allowed if all zeros?
 		public IList<byte> Unk = new List<byte>();
 
 		public class Palette {
@@ -229,7 +229,7 @@ namespace MyGameServer.Packets.GSS.Character.BaseController {
 			[Field]
 			public uint ID;
 			[Field]
-			[Length(4)]
+			[Length( 4 )]
 			public IList<Half> Transform = new List<Half>();
 			[Field]
 			public byte Usage;
@@ -237,41 +237,41 @@ namespace MyGameServer.Packets.GSS.Character.BaseController {
 
 		public class Visuals {
 			[Field]
-			[LengthPrefixed(typeof(byte))]
+			[LengthPrefixed( typeof( byte ) )]
 			public IList<Decal> Decals = new List<Decal>();
 
 			[Field]
-			[LengthPrefixed(typeof(byte))]
+			[LengthPrefixed( typeof( byte ) )]
 			public IList<DecalGradient> DecalGradients = new List<DecalGradient>();
 
 			[Field]
-			[LengthPrefixed(typeof(byte))]
+			[LengthPrefixed( typeof( byte ) )]
 			public IList<uint> Colors = new List<uint>();
 
 			[Field]
-			[LengthPrefixed(typeof(byte))]
+			[LengthPrefixed( typeof( byte ) )]
 			public IList<Palette> Palettes = new List<Palette>();
 
 			[Field]
-			[LengthPrefixed(typeof(byte))]
+			[LengthPrefixed( typeof( byte ) )]
 			public IList<Pattern> Patterns = new List<Pattern>();
 
 			[Field]
-			[LengthPrefixed(typeof(byte))]
+			[LengthPrefixed( typeof( byte ) )]
 			public IList<uint> OrnamentGroups = new List<uint>();
 
 			// Below are likely Morph Weights, Overlays and Pattern Gradients?
 
 			[Field]
-			[LengthPrefixed(typeof(byte))]
+			[LengthPrefixed( typeof( byte ) )]
 			public IList<uint> ItemsUnk1 = new List<uint>();
 
 			[Field]
-			[LengthPrefixed(typeof(byte))]
+			[LengthPrefixed( typeof( byte ) )]
 			public IList<uint> ItemsUnk2 = new List<uint>();
 
 			[Field]
-			[LengthPrefixed(typeof(byte))]
+			[LengthPrefixed( typeof( byte ) )]
 			public IList<uint> ItemsUnk3 = new List<uint>();
 		}
 
@@ -279,7 +279,7 @@ namespace MyGameServer.Packets.GSS.Character.BaseController {
 			[Field]
 			public uint ID;
 			[Field]
-			[Length(3)]
+			[Length( 3 )]
 			public IList<byte> Unk = new List<byte>();
 		}
 
@@ -289,7 +289,7 @@ namespace MyGameServer.Packets.GSS.Character.BaseController {
 			[Field]
 			public byte Slot;
 			[Field]
-			[LengthPrefixed(typeof(byte))]
+			[LengthPrefixed( typeof( byte ) )]
 			public IList<AbilityModule> AbilityModules = new List<AbilityModule>();
 			[Field]
 			public byte UnkByte1;
@@ -308,7 +308,7 @@ namespace MyGameServer.Packets.GSS.Character.BaseController {
 			[Field]
 			public uint Color;
 			[Field]
-			[Length(12)]
+			[Length( 12 )]
 			public IList<Half> Transform = new List<Half>();
 			[Field]
 			public byte Usage;
@@ -323,7 +323,7 @@ namespace MyGameServer.Packets.GSS.Character.BaseController {
 			[Field]
 			public uint ID;
 			[Field]
-			[Length(3)]
+			[Length( 3 )]
 			public IList<byte> Unk = new List<byte>();
 		}
 	}

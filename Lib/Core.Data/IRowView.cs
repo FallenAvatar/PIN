@@ -5,6 +5,8 @@ using System.Text;
 
 namespace Core.Data {
 	public interface IRowView {
-		void Load( IDataRecord row );
+		IDatabaseConnector Database { get; set; }
+		object this[string column] { get; }
+		void Load( IDataRow row );
 	}
 }
